@@ -15,9 +15,9 @@
 ;; define your app data so that it doesn't get over-written on reload
 
 (defonce app-state (atom {:user   nil
-                          :drafts [{:text  "first draft"
+                          :drafts [{:text  "previous - first draft"
                                     :notes mock-notes}
-                                   {:text  "second draft"
+                                   {:text  "current - second draft"
                                     :notes mock-notes}]}))
 
 (defn current-draft [data]
@@ -28,14 +28,16 @@
 
 (defn notepad-editor [{:keys [notes] :as draft} owner]
   (om/component
-    (html [:h6 "notepad-editor"
+    (html [:div
+           [:h6 "notepad-editor"]
            [:ul (for [note notes]
                   [:li {:content-editable true}
                    (:text note)])]])))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
   (om/component
-    (html [:h6 "notepad-reviewer"
+    (html [:div
+           [:h6 "notepad-reviewer"]
            [:ul (for [note notes]
                   [:li (:text note)])]])))
 
@@ -51,14 +53,19 @@
     (render [_]
       (html [:textarea {:on-key-down #(print "persist text/diff")}]))))
 
+(def styles-texts-notepad
+  "I want to be moved to a style namespace"
+  {:display :flex
+   :justify-content :space-around})
+
 (defn editor-view [data owner]
   (om/component
     (let [current-draft (-> data current-draft)]
-      (html [:div
+      (html [:div {:style styles-texts-notepad}
              (om/build editor current-draft)
              (om/build notepad-editor current-draft)]))))
 
-(defn reviewer [data owner]
+(defn reviewer-view [data owner]
   (reify
     om/IDisplayName
     (display-name [_] "reviewer")
@@ -69,7 +76,7 @@
          :review-draft  (last review-drafts)}))
     om/IRenderState
     (render-state [_ {:keys [review-draft]}]
-      (html [:div
+      (html [:div {:style styles-texts-notepad}
              (:text review-draft)
              (om/build notepad-reviewer review-draft)]))))
 
@@ -78,7 +85,7 @@
   (om/component
     (dom/div nil
              (om/build editor-view data)
-             (om/build reviewer data))))
+             (om/build reviewer-view data))))
 
 (om/root
   (fn [data owner]
