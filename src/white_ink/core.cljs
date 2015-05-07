@@ -1,24 +1,12 @@
 (ns ^:figwheel-always white-ink.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [sablono.core :as html :refer-macros [html]]))
+            [sablono.core :as html :refer-macros [html]]
+            [white-ink.state :refer [app-state]]))
 
 (enable-console-print!)
 
 (println "Edits to this text should show up in your developer console.")
-
-(defn- notes-gen [n]
-  (for [n (range 1 n)]
-    {:text (str "note " n)}))
-
-(def mock-notes (notes-gen 14))
-;; define your app data so that it doesn't get over-written on reload
-
-(defonce app-state (atom {:user   nil
-                          :drafts [{:text  "previous - first draft"
-                                    :notes mock-notes}
-                                   {:text  "current - second draft"
-                                    :notes mock-notes}]}))
 
 (defn current-draft [data]
   (-> data :drafts last))
@@ -31,7 +19,8 @@
     (html [:div
            [:h6 "notepad-editor"]
            [:ul (for [note notes]
-                  [:li {:content-editable true}
+                  [:li
+                   {:content-editable true}
                    (:text note)])]])))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
@@ -40,6 +29,14 @@
            [:h6 "notepad-reviewer"]
            [:ul (for [note notes]
                   [:li (:text note)])]])))
+
+(def styles-texts-notepad
+  "I want to be moved to a style namespace"
+  {:display :flex
+   :justify-content :space-around})
+
+(def styles-texts
+  {:width 500})
 
 (defn editor [{:keys [text] :as current-draft} owner]
   (reify
@@ -51,12 +48,8 @@
         (set! (. node -innerHTML) text)))
     om/IRender
     (render [_]
-      (html [:textarea {:on-key-down #(print "persist text/diff")}]))))
-
-(def styles-texts-notepad
-  "I want to be moved to a style namespace"
-  {:display :flex
-   :justify-content :space-around})
+      (html [:textarea {:style styles-texts
+                        :on-key-down #(print "persist text/diff")}]))))
 
 (defn editor-view [data owner]
   (om/component
@@ -76,8 +69,9 @@
          :review-draft  (last review-drafts)}))
     om/IRenderState
     (render-state [_ {:keys [review-draft]}]
-      (html [:div {:style styles-texts-notepad}
-             (:text review-draft)
+      (html [:div {:style (assoc styles-texts-notepad :margin-top 10)}
+             [:div {:style styles-texts}
+              (:text review-draft)]
              (om/build notepad-reviewer review-draft)]))))
 
 
