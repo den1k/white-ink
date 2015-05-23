@@ -2,7 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros [html]]
-            [white-ink.state :refer [app-state]]))
+            [white-ink.state :refer [app-state]]
+            [white-ink.utils.text :as text]))
 
 (enable-console-print!)
 
@@ -20,7 +21,8 @@
            [:h6 "notepad-editor"]
            [:ul (for [note notes]
                   [:li
-                   {:content-editable true}
+                   {:content-editable true
+                    :key              (:id note)}
                    (:text note)])]])))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
@@ -28,26 +30,62 @@
     (html [:div
            [:h6 "notepad-reviewer"]
            [:ul (for [note notes]
-                  [:li (:text note)])]])))
+                  [:li {:key (:id note)}
+                   (:text note)])]])))
 
 (def styles-texts-notepad
   "I want to be moved to a style namespace"
-  {:display :flex
-   :justify-content :space-around})
+  {:display        :flex
+   :justifyContent :space-around})
 
 (def styles-texts
   {:width 500})
+
+(defn search-result-view [text owner]
+  (om/component
+    (html [:span
+           {:style {:background "lightgrey"}}
+           text])))
+
+(defn search->html [results]
+  (for [res results
+        :let [search-res (:res res)]]
+    (if search-res
+      (om/build search-result-view search-res)
+      (:text res))))
 
 (defn editor [{:keys [text] :as current-draft} owner]
   (reify
     om/IDisplayName
     (display-name [_] "editor")
-    om/IRender
-    (render [_]
-      (html [:textarea {:style       styles-texts
-                        :value       text
-                        :on-change   #(om/update! text (.. % -target -value))
-                        :on-key-down #(print "persist text/diff")}]))))
+    om/IInitState
+    (init-state [_]
+      {:search-text nil
+       :cursor-pos nil})
+    om/IRenderState
+    (render-state [_ {:keys [search-text]}]
+      ;; don;t search on every render
+      (let [text (if search-text
+                             (search->html (text/search text search-text))
+                             text)]
+        #_(.log js/console "search" (clj->js text))
+        (html [:div {:style styles-texts}
+               [:input {:type        "text"
+                        :placeholder "Search"
+                        :value       search-text
+                        :on-change   #(om/set-state! owner :search-text (.. % -target -value))}]
+               [:div {:style            (assoc styles-texts :height 200
+                                                            :overflow "auto")
+                      :content-editable true
+
+                      :on-key-down      (fn [e]
+                                          (let [cursor-pos (.. js/window getSelection -anchorOffset)]
+                                            (.log js/console "T" cursor-pos)
+                                            (om/set-state! owner :cursor-pos cursor-pos)
+                                            ; persist entire text in memory and send diff of change to backend
+                                            (om/update! current-draft :text (.. e -target -textContent))))
+                      }
+                text]])))))
 
 (defn editor-view [data owner]
   (om/component
@@ -67,7 +105,7 @@
          :review-draft  (last review-drafts)}))
     om/IRenderState
     (render-state [_ {:keys [review-draft]}]
-      (html [:div {:style (assoc styles-texts-notepad :margin-top 10)}
+      (html [:div {:style (assoc styles-texts-notepad :marginTop 10)}
              [:div {:style styles-texts}
               (:text review-draft)]
              (om/build notepad-reviewer review-draft)]))))

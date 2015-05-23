@@ -7,7 +7,8 @@
 (defn- notes-gen [n draft-text]
   (for [n (range 1 n)
         :let [len (count draft-text)]]
-    {:text        (str "note " n)
+    {:id n
+     :text        (str "note " n)
      :draft-index (rand-int len)}))
 
 (def mock-notes-reviewable (notes-gen 14 (drafts :reviewable)))
