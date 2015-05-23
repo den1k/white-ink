@@ -20,25 +20,6 @@
                                    {:text  (drafts :editable)
                                     :notes mock-notes-editable}]}))
 
-;; TODO impl search
-(comment (let [q "good"]
-           (loop [text (drafts :reviewable) out []]
-             (let [i (.indexOf text q)]
-               (if (not= -1 i)
-                 (recur (subs text (+ i (count q))) (conj out {:text   (subs text 0 i)
-                                                               :result q}))
-                 out)))))
-
-(comment (let [orig-text (drafts :reviewable)
-       q (.toLowerCase "Good")                              ; case insensitive
-       search-text (.toLowerCase orig-text)]
-   (loop [out []]
-     (let [sum-i (apply + out)
-           i (.indexOf (subs search-text sum-i) q)]
-       (if (not= -1 i)
-         #_(recur (conj out i))
-         (prn i)
-         out)))))
 
 
 

@@ -42,13 +42,11 @@
   (reify
     om/IDisplayName
     (display-name [_] "editor")
-    om/IDidMount
-    (did-mount [_]
-      (let [node (om/get-node owner)]
-        (set! (. node -innerHTML) text)))
     om/IRender
     (render [_]
-      (html [:textarea {:style styles-texts
+      (html [:textarea {:style       styles-texts
+                        :value       text
+                        :on-change   #(om/update! text (.. % -target -value))
                         :on-key-down #(print "persist text/diff")}]))))
 
 (defn editor-view [data owner]
