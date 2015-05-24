@@ -4,7 +4,8 @@
             [sablono.core :as html :refer-macros [html]]
             [white-ink.state :refer [app-state]]
             [white-ink.utils.text :as text]
-            [cljs.core.async :as async]))
+            [cljs.core.async :as async])
+  (:require-macros [cljs.core.async.macros :as async]))
 
 (enable-console-print!)
 
@@ -77,31 +78,34 @@
 (defn set-cursor [node idx]
   (set-selection node idx idx))
 
-(defn editor [{:keys [text] :as current-draft} owner]
+(defn editor [current-draft owner]
   (reify
     om/IDisplayName
     (display-name [_] "editor")
     om/IInitState
     (init-state [_]
-      {:search-text nil
-       :cursor-pos  nil
+      {:text          (:text current-draft)
+       :search-text   nil
+       :cursor-pos    nil
        :should-update true})
-    om/IShouldUpdate
-    (should-update [_ np _]
-      (let [should-update (om/get-state owner :should-update)]
-        (om/set-state! owner :should-update true)
-        (.log js/console "np" (clj->js np))
-        should-update))
-    ;om/IDidUpdate
-    ;(did-update [_ _ _]
-    ;  (set-cursor (om/get-node owner "text") (om/get-state owner :cursor-pos)))
+    om/IWillMount
+    (will-mount [_]
+      (let [tx-sub (async/sub (:tx-chan (om/get-shared owner)) :all #_(not= % :editor) (async/chan))]
+        (async/go-loop []
+                       (when-let [[tag tx] (async/<! tx-sub)]
+                         (when-not (= :editor tag)
+                           (om/set-state! owner :text (:new-value tx)))
+                         (recur)))))
+    om/IDidUpdate
+    (did-update [_ _ {:keys [text]}]
+      (when (not= text (om/get-state owner :text))
+        (set-cursor (om/get-node owner "text") (om/get-state owner :cursor-pos))))
     om/IRenderState
-    (render-state [_ {:keys [search-text]}]
+    (render-state [_ {:keys [text search-text]}]
       ;; don;t search on every render
-      (let [text (if search-text
+      (let [text (if (not-empty search-text)
                    (search->html (text/search text search-text))
                    text)]
-        #_(.log js/console "search" (clj->js text))
         (html [:div {:style styles-texts}
                [:input {:type        "text"
                         :placeholder "Search"
@@ -113,20 +117,21 @@
                       :content-editable true
                       :on-key-up        (fn [e]
                                           (let [cursor-pos (.. js/window getSelection -anchorOffset)]
-                                            (.log js/console "T" cursor-pos)
                                             (om/set-state! owner :cursor-pos cursor-pos)
-                                            (om/set-state! owner :should-update false)
+                                            ;(om/set-state! owner :should-update false)
                                             ; persist entire text in memory and send diff of change to backend
-                                            (om/update! current-draft :text (.. e -target -textContent))))
+                                            (om/update! current-draft :text (.. e -target -textContent) :editor)))
                       }
                 text]])))))
 
 (defn editor-view [data owner]
   (om/component
     (let [current-draft (-> data current-draft)]
-      (html [:div {:style styles-texts-notepad}
-             (om/build editor current-draft)
-             (om/build notepad-editor current-draft)]))))
+      (html [:div
+             [:button {:on-click #(om/update! current-draft :text "horses in nevada" :not-editor)} "update text externally"]
+             [:div {:style styles-texts-notepad}
+              (om/build editor current-draft)
+              (om/build notepad-editor current-draft)]]))))
 
 (defn reviewer-view [data owner]
   (reify
@@ -152,7 +157,7 @@
              (om/build reviewer-view data))))
 
 (let [transactions (async/chan)
-      transactions-pub (async/pub transactions :tag)]
+      transactions-pub (async/pub transactions (fn [_] :all))]
   (om/root
     (fn [data owner]
       (reify om/IRender
@@ -160,7 +165,7 @@
           (om/build app data))))
     app-state
     {:target    (. js/document (getElementById "app"))
-     :tx-listen (fn [tx] (async/put! transactions tx))
+     :tx-listen (fn [tx] (async/put! transactions [(:tag tx) tx]))
      :shared    {:tx-chan transactions-pub}}))
 
 
