@@ -1,13 +1,18 @@
-(ns ^:figwheel-always white-ink.core
+(ns white-ink.components.app
   (:require [om.core :as om :include-macros true]
-            [cljs.core.async :as async]
+            [om.dom :as dom :include-macros true]
+            [sablono.core :as html :refer-macros [html]]
             [white-ink.state :refer [app-state]]
-            [white-ink.components.app :refer [app]])
+            [cljs.core.async :as async]
+            [white-ink.components.editor-view :refer [editor-view]]
+            [white-ink.components.reviewer-view :refer [reviewer-view]])
   (:require-macros [cljs.core.async.macros :as async]))
 
-(enable-console-print!)
-
-(println "Edits to this text should show up in your developer console.")
+(defn app [data owner]
+  (om/component
+    (dom/div nil
+             (om/build editor-view data)
+             (om/build reviewer-view data))))
 
 (let [transactions (async/chan)
       transactions-pub (async/pub transactions :tag)]
@@ -20,12 +25,4 @@
     {:target    (. js/document (getElementById "app"))
      :tx-listen (fn [tx] (async/put! transactions tx))
      :shared    {:tx-chan transactions-pub}}))
-
-
-(defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-  )
-
 
