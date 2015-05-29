@@ -12,3 +12,7 @@
 
 (defn set-cursor [node idx]
   (set-selection node idx idx))
+
+(defn set-cursor-to-end [node]
+  (let [node (or (.-lastElementChild node) node)]
+    (set-cursor node (count (.-textContent node)))))
