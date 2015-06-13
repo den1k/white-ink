@@ -30,8 +30,7 @@
     (did-mount [_]
       (let [text (om/get-state owner "text")
             node (om/get-node owner "text")]
-        (dommy/listen! node :focus #(utils.dom/set-cursor-to-end node)
-                       )))
+        (dommy/listen! node :focus #(utils.dom/set-cursor-to-end node))))
     om/IDidUpdate
     (did-update [_ _ {:keys [text]}]
       ;; update only if the text was externally reset
@@ -40,7 +39,7 @@
           (utils.dom/set-cursor (om/get-node owner "text") (count new-text)))))
     om/IRenderState
     (render-state [_ {:keys [text search-text]}]
-      (let [text (if (not-empty search-text)
+      (let [text (if (seq search-text)
                    (search/results (utils.search/find text search-text))
                    text)]
         (html [:div
@@ -52,6 +51,7 @@
                       :ref              "text"
                       :content-editable true
                       :on-click         #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
+                      :on-key-press     #(async/put! (om/get-shared owner :actions) [:key-press :editor %])
                       :on-key-up        (fn [e]
                                           (let [cursor-pos (.. js/window getSelection -anchorOffset)
                                                 new-text (.. e -target -textContent)]

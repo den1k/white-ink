@@ -10,7 +10,8 @@
 (println "Edits to this text should show up in your developer console.")
 
 (let [transactions (async/chan)
-      transactions-pub (async/pub transactions :tag)]
+      transactions-pub (async/pub transactions :tag)
+      actions-chan (async/chan)]
   (om/root
     (fn [data owner]
       (reify om/IRender
@@ -19,7 +20,8 @@
     app-state
     {:target    (. js/document (getElementById "app"))
      :tx-listen (fn [tx] (async/put! transactions tx))
-     :shared    {:tx-chan transactions-pub}}))
+     :shared    {:tx-chan transactions-pub
+                 :actions actions-chan}}))
 
 
 (defn on-js-reload []
@@ -27,5 +29,7 @@
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
   )
+
+
 
 

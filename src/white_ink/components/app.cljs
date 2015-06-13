@@ -5,14 +5,20 @@
             [white-ink.state :refer [app-state]]
             [cljs.core.async :as async]
             [white-ink.components.editor-view :refer [editor-view]]
-            [white-ink.components.reviewer-view :refer [reviewer-view]])
+            [white-ink.components.reviewer-view :refer [reviewer-view]]
+            [white-ink.utils.actions :refer [start-actions-handler]])
   (:require-macros [cljs.core.async.macros :as async]))
 
 (defn app [data owner]
-  (om/component
-    (dom/div nil
-             (om/build editor-view data)
-             (om/build reviewer-view data))))
+  (reify
+    om/IDidMount
+    (did-mount [_]
+      (start-actions-handler (om/get-shared owner :actions)))
+    om/IRender
+    (render [_]
+      (dom/div nil
+               (om/build editor-view data)
+               (om/build reviewer-view data)))))
 
 (let [transactions (async/chan)
       transactions-pub (async/pub transactions :tag)]
@@ -24,5 +30,6 @@
     app-state
     {:target    (. js/document (getElementById "app"))
      :tx-listen (fn [tx] (async/put! transactions tx))
-     :shared    {:tx-chan transactions-pub}}))
+     :shared    {:tx-chan transactions-pub
+                 :actions (async/chan)}}))
 
