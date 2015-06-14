@@ -9,6 +9,9 @@
 
 (println "Edits to this text should show up in your developer console.")
 
+;; okay with this being a global. pretty much same as om/shared
+(def actions-chan (async/chan))
+
 (let [transactions (async/chan)
       transactions-pub (async/pub transactions :tag)
       events (async/chan)
@@ -24,7 +27,7 @@
      :tx-listen (fn [tx] (async/put! transactions tx))
 
      :shared    {:tx-chan transactions-pub
-                 :actions (async/chan)
+                 :actions actions-chan
                  :events events
                  :events-pub events-pub
                  }}))

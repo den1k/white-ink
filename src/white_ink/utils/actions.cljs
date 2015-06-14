@@ -8,11 +8,13 @@
                  (when-let [action-vec (<! actions)]
                    ((fn [action-vec]
                       (match [action-vec]
-                             [[:key-down :editor :backslash]] (put! events [:notepad-editor :new-note])
+                             [[:key-down :editor :tab]] (put! events [:notepad-editor :new-note])
                              [[:key-down :editor :arrow-left]] (constantly nil)
                              [[:key-down :editor :arrow-up]] (constantly nil)
                              [[:key-down :editor :arrow-right]] (constantly nil)
                              [[:key-down :editor :arrow-down]] (constantly nil)
+                             ;; todo it persists note, impl refocus editor
+                             [[:key-down :notepad-editor :return opts]] (do (om.core/update! (:note opts) [:text] (:new-text opts)))
 
                              :else (.warn js/console "Unknown action: " (clj->js action-vec)))) action-vec)
                    (recur))))

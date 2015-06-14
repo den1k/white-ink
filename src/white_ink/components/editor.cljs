@@ -52,7 +52,7 @@
                       :ref              "text"
                       :content-editable true
                       :on-click         #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
-                      :on-key-down      (partial handle-shortcut owner :editor)
+                      :on-key-down      #(handle-shortcut :editor %)
                       ; todo om/update is too slow on fast typing. Maybe diff impl. will be faster.
                       :on-key-up        (fn [e]
                                           (let [cursor-pos (.. js/window getSelection -anchorOffset)

@@ -3,7 +3,8 @@
             [sablono.core :as html :refer-macros [html]]
             [white-ink.utils.dom :as utils.dom]
             [cljs.core.async :refer [<! sub chan]]
-            [white-ink.utils.state :refer [make-squuid]])
+            [white-ink.utils.state :refer [make-squuid]]
+            [white-ink.utils.shortcuts :refer [handle-shortcut]])
   (:require-macros [cljs.core.async.macros :as async]))
 
 (defn notepad-editor [{:keys [notes] :as draft} owner]
@@ -15,14 +16,13 @@
     (will-mount [_]
       (let [event-chan (sub (om/get-shared owner :events-pub) :notepad-editor (chan))]
         (async/go-loop []
-                       (when-let [event (<! event-chan)]
-                         (js/console.log "NP received event" event)
-                         (om/transact! draft [:notes] #(conj % {:text "NEW NOTE"
-                                                                :draft-index 123
-                                                                :id (make-squuid)}))
+                       (when-let [event (last (<! event-chan))]
+                         (print "EVENT" event)
+                         (case event
+                           :new-note (om/transact! draft [:notes] #(conj % {:text        " "
+                                                                            :draft-index (count (:text draft))
+                                                                            :id          (make-squuid)})))
                          (om/set-state! owner :focus-last-note true)
-                         (.log js/console (om/get-node owner "notes"))
-
 
                          (recur)))))
     om/IDidUpdate
@@ -38,7 +38,10 @@
               (for [note notes]
                 [:li
                  {:content-editable true
-                  :key              (:id note)}
+                  :key              (:id note)
+                  ;; todo pass less detail, too specific for shortcut handler
+                  :on-key-down      #(handle-shortcut :notepad-editor {:note note
+                                                                       :new-text (.. % -target -innerText)} %)}
                  (:text note)])]]))))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
