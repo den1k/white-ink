@@ -1,4 +1,5 @@
-(ns white-ink.utils.search)
+(ns white-ink.utils.search
+  (:refer-clojure :exclude [find]))
 
 (defn find [text query]
   (if-not (every? seq [text query])

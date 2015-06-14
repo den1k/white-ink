@@ -11,7 +11,8 @@
 
 (let [transactions (async/chan)
       transactions-pub (async/pub transactions :tag)
-      actions-chan (async/chan)]
+      events (async/chan)
+      events-pub (async/pub events first)]
   (om/root
     (fn [data owner]
       (reify om/IRender
@@ -19,9 +20,15 @@
           (om/build app data))))
     app-state
     {:target    (. js/document (getElementById "app"))
+
      :tx-listen (fn [tx] (async/put! transactions tx))
+
      :shared    {:tx-chan transactions-pub
-                 :actions actions-chan}}))
+                 :actions (async/chan)
+                 :events events
+                 :events-pub events-pub
+                 }}))
+
 
 
 (defn on-js-reload []

@@ -11,25 +11,12 @@
 
 (defn app [data owner]
   (reify
-    om/IDidMount
-    (did-mount [_]
-      (start-actions-handler (om/get-shared owner :actions)))
+    om/IWillMount
+    (will-mount [_]
+      (do
+        (start-actions-handler (om/get-shared owner) data)))
     om/IRender
     (render [_]
       (dom/div nil
                (om/build editor-view data)
                (om/build reviewer-view data)))))
-
-(let [transactions (async/chan)
-      transactions-pub (async/pub transactions :tag)]
-  (om/root
-    (fn [data owner]
-      (reify om/IRender
-        (render [_]
-          (om/build app data))))
-    app-state
-    {:target    (. js/document (getElementById "app"))
-     :tx-listen (fn [tx] (async/put! transactions tx))
-     :shared    {:tx-chan transactions-pub
-                 :actions (async/chan)}}))
-
