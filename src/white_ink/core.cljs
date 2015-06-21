@@ -2,20 +2,16 @@
   (:require [om.core :as om :include-macros true]
             [cljs.core.async :as async]
             [white-ink.state :refer [app-state]]
-            [white-ink.components.app :refer [app]])
+            [white-ink.components.app :refer [app]]
+            [white-ink.chans :refer [action-chan event-chan events-pub]])
   (:require-macros [cljs.core.async.macros :as async]))
 
 (enable-console-print!)
 
 (println "Edits to this text should show up in your developer console.")
 
-;; okay with this being a global. pretty much same as om/shared
-(def actions-chan (async/chan))
-
 (let [transactions (async/chan)
-      transactions-pub (async/pub transactions :tag)
-      events (async/chan)
-      events-pub (async/pub events first)]
+      transactions-pub (async/pub transactions :tag)]
   (om/root
     (fn [data owner]
       (reify om/IRender
@@ -27,8 +23,8 @@
      :tx-listen (fn [tx] (async/put! transactions tx))
 
      :shared    {:tx-chan transactions-pub
-                 :actions actions-chan
-                 :events events
+                 :actions action-chan
+                 :events event-chan
                  :events-pub events-pub
                  }}))
 

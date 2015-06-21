@@ -9,7 +9,8 @@
             [white-ink.styles.styles :as styles]
             [dommy.core :as dommy]
             [white-ink.utils.shortcuts :refer [handle-shortcut]])
-  (:require-macros [cljs.core.async.macros :as async]))
+  (:require-macros [cljs.core.async.macros :as async]
+                   [white-ink.macros :refer [process-event]]))
 
 (defn editor [current-draft owner]
   (reify
@@ -22,11 +23,15 @@
        :should-update true})
     om/IWillMount
     (will-mount [_]
-      (let [tx-sub (async/sub (:tx-chan (om/get-shared owner)) :editor (async/chan))]
-        (async/go-loop []
-                       (when-let [tx (async/<! tx-sub)]
-                         (om/set-state! owner :text (:new-value tx))
-                         (recur)))))
+      (do
+        (process-event :editor
+                       :focus (utils.dom/set-cursor-to-end (om/get-node owner "text")))
+        ;todo refactor to fn
+        (let [tx-sub (async/sub (:tx-chan (om/get-shared owner)) :editor (async/chan))]
+         (async/go-loop []
+                        (when-let [tx (async/<! tx-sub)]
+                          (om/set-state! owner :text (:new-value tx))
+                          (recur))))))
     om/IDidMount
     (did-mount [_]
       (let [text (om/get-state owner "text")
@@ -58,6 +63,6 @@
                                           (let [cursor-pos (.. js/window getSelection -anchorOffset)
                                                 new-text (.. e -target -textContent)]
                                             ; persist entire text in memory and send diff of change to backend
-                                            (om/update! current-draft :text new-text :editor)))
+                                            #_(om/update! current-draft :text new-text :editor)))
                       }
                 text]])))))

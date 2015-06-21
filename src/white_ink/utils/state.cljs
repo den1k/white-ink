@@ -1,4 +1,5 @@
-(ns white-ink.utils.state)
+(ns white-ink.utils.state
+  (:require [om.core :as om]))
 
 (defn make-squuid
   "(make-squuid)  =>  new-uuid
@@ -17,8 +18,11 @@
           (f [] (.toString (rand-int 16) 16))
           (g [] (.toString (bit-or 0x8 (bit-and 0x3 (rand-int 15))) 16))]
     (UUID. (clojure.string/join (concat
-                          (top-32-bits) "-"
-                          (repeatedly 4 f) "-4"
-                          (repeatedly 3 f) "-"
-                          (g) (repeatedly 3 f) "-"
-                          (repeatedly 12 f))))))
+                                  (top-32-bits) "-"
+                                  (repeatedly 4 f) "-4"
+                                  (repeatedly 3 f) "-"
+                                  (g) (repeatedly 3 f) "-"
+                                  (repeatedly 12 f))))))
+
+(defn save-note! [{:keys [note text]}]
+  (om/update! note [:text] text))
