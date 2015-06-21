@@ -33,8 +33,10 @@
                 [:li
                  {:content-editable true
                   :key              (:id note)
-                  ;; todo pass less detail, too specific for shortcut handler
-                  :on-blur          #(white-ink.utils.state/save-note! {:note note :text (.. % -target -innerText)})
+                  ;; todo can be sent to action handler instead
+                  :on-blur          #(white-ink.utils.state/save-note! {:note note
+                                                                       :notes notes
+                                                                       :text (.. % -target -innerText)})
                   :on-key-down      #(handle-shortcuts :notepad-editor {:note note
                                                                         :draft-index (count (:text draft))} %)}
                  (:text note)])]]))))

@@ -1,5 +1,6 @@
 (ns white-ink.utils.state
   (:require [om.core :as om]
+            [goog.string :as gstring]
             [clojure.string :as string]))
 
 (defn make-squuid
@@ -25,5 +26,14 @@
                                   (g) (repeatedly 3 f) "-"
                                   (repeatedly 12 f))))))
 
-(defn save-note! [{:keys [note] :as note-map}]
-  (om/update! note (merge @note (dissoc note-map :note))))
+(defn save-note!
+  "Saves a note and it's attributes. If there is no text in the node it will delete it.
+  (Currently only deletes last note. TODO delete based on index"
+  [{:keys [notes note text] :as note-map}]
+  (if (gstring/isEmptyOrWhitespace text)
+    (when notes
+      (let [note-idx (last (om/path note))]
+        ;; todo impl idx specific removal
+        (om/transact! notes pop)
+        #_(prn "nu notes" (clj->js (:notes (last (:drafts @(om/transact! notes pop))))))))
+    (om/update! note (merge @note (dissoc note-map :note :notes)))))
