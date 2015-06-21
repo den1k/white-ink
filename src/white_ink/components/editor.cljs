@@ -8,7 +8,7 @@
             [white-ink.utils.text :as text]
             [white-ink.styles.styles :as styles]
             [dommy.core :as dommy]
-            [white-ink.utils.shortcuts :refer [handle-shortcut]])
+            [white-ink.utils.shortcuts :refer [handle-shortcuts]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [process-event]]))
 
@@ -57,7 +57,7 @@
                       :ref              "text"
                       :content-editable true
                       :on-click         #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
-                      :on-key-down      #(handle-shortcut :editor %)
+                      :on-key-down      #(handle-shortcuts :editor %)
                       ; todo om/update is too slow on fast typing. Maybe diff impl. will be faster.
                       :on-key-up        (fn [e]
                                           (let [cursor-pos (.. js/window getSelection -anchorOffset)

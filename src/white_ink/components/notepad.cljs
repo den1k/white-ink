@@ -4,7 +4,7 @@
             [white-ink.utils.dom :as utils.dom]
             [cljs.core.async :refer [<! sub chan]]
             [white-ink.utils.state :refer [make-squuid]]
-            [white-ink.utils.shortcuts :refer [handle-shortcut]])
+            [white-ink.utils.shortcuts :refer [handle-shortcuts]])
   (:require-macros [white-ink.macros :refer [process-event]]))
 
 (defn notepad-editor [{:keys [notes] :as draft} owner]
@@ -34,8 +34,9 @@
                  {:content-editable true
                   :key              (:id note)
                   ;; todo pass less detail, too specific for shortcut handler
-                  :on-key-down      #(handle-shortcut :notepad-editor {:note note
-                                                                       :text (.. % -target -innerText)} %)}
+                  :on-blur          #(white-ink.utils.state/save-note! {:note note :text (.. % -target -innerText)})
+                  :on-key-down      #(handle-shortcuts :notepad-editor {:note note
+                                                                        :draft-index (count (:text draft))} %)}
                  (:text note)])]]))))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
