@@ -3,6 +3,8 @@
             [cljs.core.async :as async]
             [white-ink.state :refer [app-state]]
             [white-ink.components.app :refer [app]]
+    ;; importing utils because it is used by a macro and would otherwise throw error
+            [white-ink.utils.utils :as utils]
             [white-ink.chans :refer [action-chan event-chan events-pub]])
   (:require-macros [cljs.core.async.macros :as async]))
 
