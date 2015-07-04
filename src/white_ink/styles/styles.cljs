@@ -1,22 +1,38 @@
 (ns white-ink.styles.styles)
 
-(def texts-notepad
+(def ^:const texts-and-notepad
   {:display        :flex
    :justifyContent :space-around})
 
-(def texts
+(def ^:const texts
   {:width 500})
 
-(def editor-view
-  (merge texts-notepad {}))
+(def ^:const editor-view
+  (merge texts-and-notepad {}))
 
-(def editor-text
+(def ^:const editor-text
   (merge texts {:height   200
-                :overflow "auto"}))
+                :overflow "auto"
+                :outline  "none"}))
 
-(def reviewer-text
+(def ^:const reviewer-text
   (merge texts {:height   400
                 :overflow "auto"}))
 
-(def reviewer-view
-  (merge texts-notepad {:marginTop 10}))
+(def ^:const reviewer-view
+  (merge texts-and-notepad {:marginTop 10}))
+
+(def ^:const notepad
+  {})
+
+(def ^:const note-editor
+  {:outline "none"})
+
+(def ^:const note-reviewer
+  (dissoc note-editor :outline))
+
+(def ^:const reviewer-text-on-search
+  (assoc reviewer-text :color "silver"))
+
+(def ^:const search-result
+  {:color "black"})

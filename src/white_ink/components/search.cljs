@@ -1,11 +1,12 @@
 (ns white-ink.components.search
   (:require [om.core :as om]
-            [sablono.core :as html :refer-macros [html]]))
+            [sablono.core :as html :refer-macros [html]]
+            [white-ink.styles.styles :as styles]))
 
 (defn result [text owner]
   (om/component
     (html [:span
-           {:style {:background "lightgrey"}}
+           {:style styles/search-result}
            text])))
 
 (defn results [results]

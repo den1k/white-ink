@@ -5,7 +5,7 @@
             [white-ink.components.app :refer [app]]
     ;; importing utils because it is used by a macro and would otherwise throw error
             [white-ink.utils.utils :as utils]
-            [white-ink.chans :refer [action-chan event-chan events-pub]])
+            [white-ink.chans :refer [action-chan task-chan task-pub]])
   (:require-macros [cljs.core.async.macros :as async]))
 
 (enable-console-print!)
@@ -26,8 +26,8 @@
 
      :shared    {:tx-chan transactions-pub
                  :actions action-chan
-                 :events event-chan
-                 :events-pub events-pub
+                 :tasks task-chan
+                 :tasks-pub task-pub
                  }}))
 
 
@@ -35,6 +35,7 @@
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
+  :on-jsload nil
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
   )
 

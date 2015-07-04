@@ -17,6 +17,7 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:user   nil
+                          :searching? false
                           :drafts [{:text  (drafts :reviewable)
                                     :notes mock-notes-reviewable}
                                    {:text  (drafts :editable)

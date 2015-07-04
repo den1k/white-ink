@@ -4,8 +4,9 @@
             [white-ink.utils.dom :as utils.dom]
             [cljs.core.async :refer [<! sub chan]]
             [white-ink.utils.state :refer [make-squuid]]
-            [white-ink.utils.shortcuts :refer [handle-shortcuts]])
-  (:require-macros [white-ink.macros :refer [process-event]]))
+            [white-ink.utils.shortcuts :refer [handle-shortcuts]]
+            [white-ink.styles.styles :as styles])
+  (:require-macros [white-ink.macros :refer [process-task]]))
 
 (defn notepad-editor [{:keys [notes] :as draft} owner]
   (reify
@@ -14,11 +15,12 @@
       :focus-last-note false)
     om/IWillMount
     (will-mount [_]
-      (process-event :notepad-editor
-                     :new-note (do (om/transact! draft [:notes] #(conj % {:text        " "
-                                                                          :draft-index (count (:text draft))
-                                                                          :id          (make-squuid)}))
-                                   (om/set-state! owner :focus-last-note true))))
+      (process-task :notepad-editor
+                     :new-note (fn []
+                                 (om/transact! draft [:notes] #(conj % {:text        " "
+                                                                            :draft-index (count (:text draft))
+                                                                            :id          (make-squuid)}))
+                                 (om/set-state! owner :focus-last-note true))))
     om/IDidUpdate
     (did-update [_ _ _]
       (when (om/get-state owner :focus-last-note)
@@ -33,11 +35,12 @@
                 [:li
                  {:content-editable true
                   :key              (:id note)
+                  :style            styles/note-editor
                   ;; todo can be sent to action handler instead
-                  :on-blur          #(white-ink.utils.state/save-note! {:note note
-                                                                       :notes notes
-                                                                       :text (.. % -target -innerText)})
-                  :on-key-down      #(handle-shortcuts :notepad-editor {:note note
+                  :on-blur          #(white-ink.utils.state/save-note! {:note  note
+                                                                        :notes notes
+                                                                        :text  (.. % -target -innerText)})
+                  :on-key-down      #(handle-shortcuts :notepad-editor {:note        note
                                                                         :draft-index (count (:text draft))} %)}
                  (:text note)])]]))))
 
@@ -46,5 +49,6 @@
     (html [:div
            [:h6 "notepad-reviewer"]
            [:ul (for [note notes]
-                  [:li {:key (:id note)}
+                  [:li {:key   (:id note)
+                        :style styles/note-reviewer}
                    (:text note)])]])))

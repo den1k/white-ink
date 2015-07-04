@@ -27,7 +27,6 @@
    (handle-shortcuts source nil event))
   ([source opts event]
    (let [keycode (.-keyCode event)]
-     (.log js/console "SORC" source)
      (prn "KEYCODE:" keycode)
      (when-let [key (get-key source keycode)]
        (let [message (if opts
