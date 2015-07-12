@@ -1,8 +1,9 @@
 (ns white-ink.utils.search
+  (:require [white-ink.utils.text :as utils.text])
   (:refer-clojure :exclude [find]))
 
 (defn find [text query]
-  (if-not (every? seq [text query])
+  (if (utils.text/empty-or-whitespace? query)
     [{:text text}]
     (let [q (.toLowerCase query)                            ; case insensitive
           q-len (count q)

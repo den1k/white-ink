@@ -14,7 +14,8 @@
 (def ^:const ^:private allowed-keys
   "Only using this because the event needs to be handled in the handler.
   Therefore it is necessary to know which events do prevent and which to let pass."
-  {:editor         (select-keys key-map [9 220 37 38 39 40])
+  {:app (select-keys key-map [220])
+   :editor         (select-keys key-map [9 220 37 38 39 40])
    :notepad-editor (select-keys key-map [40 13])})
 
 (defn get-key [source keycode]

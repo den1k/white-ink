@@ -6,7 +6,9 @@
             [cljs.core.async :as async]
             [white-ink.components.editor-view :refer [editor-view]]
             [white-ink.components.reviewer-view :refer [reviewer-view]]
-            [white-ink.utils.actions :refer [start-actions-handler]])
+            [white-ink.utils.actions :refer [start-actions-handler]]
+            [white-ink.components.search :as search]
+            [white-ink.utils.shortcuts :refer [handle-shortcuts]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [send-action!]]))
 
@@ -19,8 +21,9 @@
     om/IRender
     (render [_]
       (html [:div
-             {:on-key-press #(when searching?
-                              (send-action! :reviewer :search (.-key %))
-                              (.preventDefault %))}
+             {:on-key-down #(handle-shortcuts :app %)}
+             (when searching?
+               (om/build search/input data))
              (om/build editor-view data)
-             (om/build reviewer-view data)]))))
+             (om/build reviewer-view data)
+             ]))))

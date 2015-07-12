@@ -5,7 +5,8 @@
             [white-ink.styles.styles :as styles]
             [white-ink.components.notepad :refer [notepad-reviewer]]
             [white-ink.utils.search :as utils.search]
-            [white-ink.components.search :as search])
+            [white-ink.components.search :as search]
+            [white-ink.utils.text :as utils.text])
   (:require-macros [white-ink.macros :refer [process-task]]))
 
 (defn reviewer-view [{:keys [searching?] :as data} owner]
@@ -23,11 +24,7 @@
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
-                    ;; todo impl delete in search. still consider to render input field off-screen
-                    :search (fn [char] (if (seq (om/get-state owner :search-text))
-                                         (om/update-state! owner :search-text #(-> (concat % char)
-                                                                                   clojure.string/join))
-                                         (om/set-state! owner :search-text char)))))
+                    :search #(om/set-state! owner :search-text %)))
     om/IRenderState
     (render-state [_ {:keys [text review-draft search-text]}]
       (let [text (if (seq search-text)

@@ -1,4 +1,5 @@
-(ns white-ink.utils.text)
+(ns white-ink.utils.text
+  (:require [goog.string :as gstring]))
 
 (defn search [text query]
   (if-not (every? seq [text query])
@@ -20,3 +21,11 @@
             (if-not (= prev-idx t-len)
               (conj out {:text (subs text prev-idx)})
               out)))))))
+
+(def empty-or-whitespace?
+  gstring/isEmptyOrWhitespace)
+
+(defn not-empty-or-whitespace [string]
+  (when-not (empty-or-whitespace? string)
+    string))
+
