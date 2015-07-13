@@ -10,9 +10,7 @@
                  (when-let [action-vec (<! actions)]
                    ((fn [action-vec]
                       (match [action-vec]
-                             [[:key-down :app :backslash]] (do (when (:searching? @app-state)
-                                                                 (put! tasks [:editor :focus]))
-                                                               (om/transact! app-state :searching? not))
+                             [[:key-down :app :backslash]] (recur [:toggle-search])
                              [[:key-down :editor :tab]] (put! tasks [:notepad-editor :new-note])
 
                              [[:key-down :editor :arrow-left]] (constantly nil)
@@ -23,6 +21,12 @@
                              [[:key-down :notepad-editor :return opts]] (do (save-note! opts)
                                                                             (put! tasks [:editor :focus]))
                              [[:reviewer :search query]] (put! tasks [:reviewer :search query])
+
+                             [[:toggle-search]] (do (when (:searching? @app-state)
+                                                      (put! tasks [:editor :focus]))
+                                                    (om/transact! app-state :searching? not))
+                             [[:search-off]] (do (put! tasks [:editor :focus])
+                                                 (om/update! app-state :searching? false))
 
                              :else (.warn js/console "Unknown action: " (clj->js action-vec)))) action-vec)
                    (recur))))

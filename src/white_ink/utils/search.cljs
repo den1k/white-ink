@@ -22,3 +22,8 @@
             (if-not (= prev-idx t-len)
               (conj out {:text (subs text prev-idx)})
               out)))))))
+
+(defn constrain-query [q]
+  (if (> 2 (count q))
+    ""
+    q))

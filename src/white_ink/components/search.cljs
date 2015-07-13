@@ -6,13 +6,20 @@
   (:require-macros [white-ink.macros :refer [send-action!]]))
 
 (defn input [state owner]
-  (om/component
-    (html [:input {:on-change  #(->> (.. % -target -value)
-                                     (send-action! :reviewer :search))
-                   :auto-focus true
-                   :style      {:background "tomato"
-                                :position   "absolute"
-                                :left       -9999}}])))
+  (reify
+    om/IWillUnmount
+    (will-unmount [_]
+      (send-action! :reviewer :search ""))
+    om/IRender
+    (render [_]
+      (html [:input {:on-change  #(->> (.. % -target -value)
+                                       (send-action! :reviewer :search))
+                     :on-blur    #(send-action! :search-off)
+                     :auto-focus true
+                     :style      {:background "tomato"
+                                  ;; render off-screen
+                                  :position   "absolute"
+                                  :left       -9999}}]))))
 
 (defn result [text owner]
   (om/component

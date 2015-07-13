@@ -5,8 +5,7 @@
             [white-ink.styles.styles :as styles]
             [white-ink.components.notepad :refer [notepad-reviewer]]
             [white-ink.utils.search :as utils.search]
-            [white-ink.components.search :as search]
-            [white-ink.utils.text :as utils.text])
+            [white-ink.components.search :as search])
   (:require-macros [white-ink.macros :refer [process-task]]))
 
 (defn reviewer-view [{:keys [searching?] :as data} owner]
@@ -20,16 +19,14 @@
         {:review-drafts review-drafts
          :review-draft  review-draft
          :text          (:text review-draft)
-         :search-text   nil}))
+         :search-text   ""}))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
-                    :search #(om/set-state! owner :search-text %)))
+                    :search #(om/set-state! owner :search-text (utils.search/constrain-query %))))
     om/IRenderState
     (render-state [_ {:keys [text review-draft search-text]}]
-      (let [text (if (seq search-text)
-                   (search/results (utils.search/find text search-text))
-                   text)]
+      (let [text (search/results (utils.search/find text search-text))]
         (html [:div {:style styles/reviewer-view}
                [:div
                 {:style (if-not searching?
