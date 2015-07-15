@@ -20,6 +20,9 @@
                              ;; todo it persists note, impl refocus editor
                              [[:key-down :notepad-editor :return opts]] (do (save-note! opts)
                                                                             (put! tasks [:editor :focus]))
+                             [[:key-down :search :right-bracket]] (put! tasks [:reviewer :search-dir :forward] )
+                             [[:key-down :search :left-bracket]] (put! tasks [:reviewer :search-dir :backward] )
+
                              [[:reviewer :search query]] (put! tasks [:reviewer :search query])
 
                              [[:toggle-search]] (do (when (:searching? @app-state)

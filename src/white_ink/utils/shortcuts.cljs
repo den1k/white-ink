@@ -5,6 +5,8 @@
 (def ^:const ^:private key-map
   {220 :backslash
    9   :tab
+   221 :right-bracket
+   219 :left-bracket
    37  :arrow-left
    38  :arrow-up
    39  :arrow-right
@@ -14,9 +16,10 @@
 (def ^:const ^:private allowed-keys
   "Only using this because the event needs to be handled in the handler.
   Therefore it is necessary to know which events do prevent and which to let pass."
-  {:app (select-keys key-map [220])
+  {:app            (select-keys key-map [220])
    :editor         (select-keys key-map [9 37 38 39 40])
-   :notepad-editor (select-keys key-map [40 13])})
+   :notepad-editor (select-keys key-map [40 13])
+   :search         (select-keys key-map [221 219])})
 
 (defn get-key [source keycode]
   (-> allowed-keys
