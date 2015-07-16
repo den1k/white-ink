@@ -21,7 +21,10 @@
                        (into out to-out))))
             (if-not (= prev-idx t-len)
               (conj out {:text (subs text prev-idx)})
-              out)))))))
+              ;; return nil if no results
+              (if (< 1 (count out))
+                out
+                nil))))))))
 
 (defn constrain-query [q]
   (if (> 2 (count q))

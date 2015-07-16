@@ -53,20 +53,23 @@
         {:review-drafts review-drafts
          :review-draft  review-draft
          :render-text   [review-draft]
-         :result-idx    1}))
+         :result-idx    nil}))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
                     :search #(let [text (om/get-state owner [:review-draft :text])
                                    query (utils.search/constrain-query %)]
-                              (om/set-state! owner :render-text (utils.search/find text query)))
+                              (when-let [results (utils.search/find text query)]
+                                ;; find first visible result on i-did-update and set idx to it
+                                (om/set-state! owner :result-idx nil)
+                                (om/set-state! owner :render-text results)))
                     :search-dir #(let [cur-idx (om/get-state owner :result-idx)
                                        search-text (om/get-state owner :render-text)
                                        next-idx (next-search-idx % cur-idx search-text)]
                                   (om/set-state! owner :result-idx next-idx))))
     om/IRenderState
     (render-state [_ {:keys [render-text review-draft result-idx]}]
-      (let [render-text (if searching?
+      (let [render-text (if (and searching? result-idx)
                           (update render-text result-idx assoc :selected? true)
                           render-text)]
         ;; todo enable selected search results and go back and forth between them
