@@ -1,5 +1,6 @@
 (ns white-ink.utils.search
-  (:require [white-ink.utils.text :as utils.text])
+  (:require [white-ink.utils.text :as utils.text]
+            [white-ink.utils.utils :as utils])
   (:refer-clojure :exclude [find]))
 
 (defn find [text query]
@@ -30,3 +31,30 @@
   (if (> 2 (count q))
     ""
     q))
+
+
+(def count-until-search-res
+  (partial utils/count-until-pred :res))
+
+(defn next-res-idx [dir cur-idx search-results]
+  ;(prn "dir" dir)
+  ;(prn "cur-idx" cur-idx)
+  ;(prn "count" (count search-results))
+  (let [steps (case dir
+                :forward (->> (inc cur-idx)
+                              (subvec search-results)
+                              count-until-search-res
+                              inc)
+                :backward (-> (subvec search-results 0 cur-idx)
+                              reverse
+                              count-until-search-res
+                              inc
+                              -))
+        next-idx (+ cur-idx steps)]
+    ;(prn "next idx" next-idx)
+    (cond
+      ; going backwards and no more results
+      (neg? next-idx) (next-res-idx dir (count search-results) search-results)
+      ; passed in cur idx lies outside of search-results
+      (> next-idx (dec (count search-results))) (next-res-idx dir 0 search-results)
+      :else next-idx)))

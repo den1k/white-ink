@@ -8,40 +8,6 @@
             [white-ink.components.search :as search])
   (:require-macros [white-ink.macros :refer [process-task]]))
 
-(defn count-until-pred [pred coll]
-  (reduce (fn [c item]
-            (if (pred item)
-              (reduced c)
-              (inc c))) 0 coll))
-
-(def count-until-search-res
-  (partial count-until-pred :res))
-
-(defn next-search-idx [dir cur-idx search-results]
-  ;(prn "dir" dir)
-  ;(prn "cur-idx" cur-idx)
-  ;(prn "count" (count search-results))
-  (let [steps (case dir
-                :forward (->> (inc cur-idx)
-                              (subvec search-results)
-                              count-until-search-res
-                              inc)
-                :backward (-> (subvec search-results 0 cur-idx)
-                              reverse
-                              count-until-search-res
-                              inc
-                              -))
-        next-idx (+ cur-idx steps)]
-    ;(prn "next idx" next-idx)
-    (cond
-      ; going backwards and no more results
-      (neg? next-idx) (next-search-idx dir (count search-results) search-results)
-      ; passed in cur idx lies outside of search-results
-      (> next-idx (dec (count search-results))) (next-search-idx dir 0 search-results)
-      :else next-idx)))
-
-;(next-search-idx :backward 2 [:a :b {:res :bla} :d {:res :bla}])
-
 (defn reviewer-view [{:keys [searching?] :as data} owner]
   (reify
     om/IDisplayName
@@ -65,7 +31,7 @@
                                 (om/set-state! owner :render-text results)))
                     :search-dir #(let [cur-idx (om/get-state owner :result-idx)
                                        search-text (om/get-state owner :render-text)
-                                       next-idx (next-search-idx % cur-idx search-text)]
+                                       next-idx (utils.search/next-res-idx % cur-idx search-text)]
                                   (om/set-state! owner :result-idx next-idx))))
     om/IRenderState
     (render-state [_ {:keys [render-text review-draft result-idx]}]
@@ -73,7 +39,7 @@
                           (update render-text result-idx assoc :selected? true)
                           render-text)]
         ;; todo enable selected search results and go back and forth between them
-        (prn (map keys render-text))
+        ;(prn (map keys render-text))
         (html [:div {:style styles/reviewer-view}
                [:div
                 {:style (if-not searching?

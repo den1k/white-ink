@@ -28,3 +28,9 @@
       f? (apply f? (rest exp))
       match? (match?)
       :else (.error js/console "Unknown case:" (clj->js exp)))))
+
+(defn count-until-pred [pred coll]
+  (reduce (fn [c item]
+            (if (pred item)
+              (reduced c)
+              (inc c))) 0 coll))
