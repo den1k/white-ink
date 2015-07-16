@@ -14,8 +14,7 @@
     (render [_]
       (html [:input {:on-change   #(->> (.. % -target -value)
                                         (send-action! :reviewer :search))
-                     ;; temp commment
-                     ;:on-blur    #(send-action! :search-off)
+                     :on-blur    #(send-action! :search-off)
                      :on-key-down #(handle-shortcuts :search %)
                      :auto-focus  true
                      :style       {:background "tomato"

@@ -20,25 +20,25 @@
 (defn next-search-idx [dir cur-idx search-results]
   ;(prn "dir" dir)
   ;(prn "cur-idx" cur-idx)
-  ;(prn "dir" dir)
-  ; todo broken on last index forward
+  ;(prn "count" (count search-results))
   (let [steps (case dir
-                :forward (-> (subvec search-results (inc cur-idx))
-                             count-until-search-res
-                             inc)
+                :forward (->> (inc cur-idx)
+                              (subvec search-results)
+                              count-until-search-res
+                              inc)
                 :backward (-> (subvec search-results 0 cur-idx)
                               reverse
                               count-until-search-res
                               inc
                               -))
         next-idx (+ cur-idx steps)]
+    ;(prn "next idx" next-idx)
     (cond
       ; going backwards and no more results
       (neg? next-idx) (next-search-idx dir (count search-results) search-results)
       ; passed in cur idx lies outside of search-results
-      (> next-idx (count search-results)) (next-search-idx dir 0 search-results)
-      :else next-idx)
-    ))
+      (> next-idx (dec (count search-results))) (next-search-idx dir 0 search-results)
+      :else next-idx)))
 
 ;(next-search-idx :backward 2 [:a :b {:res :bla} :d {:res :bla}])
 
@@ -53,25 +53,22 @@
         {:review-drafts review-drafts
          :review-draft  review-draft
          :render-text   [review-draft]
-         :result-idx    1
-         :search-text   ""}))
+         :result-idx    1}))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
-                    :search #(let [text (om/get-state owner [:review-draft :text])]
-                              #_(om/set-state! owner :search-text (utils.search/constrain-query %))
-                              ;(prn (utils.search/find text (utils.search/constrain-query %)))
-                              (om/set-state! owner :render-text (utils.search/find text (utils.search/constrain-query %))))
+                    :search #(let [text (om/get-state owner [:review-draft :text])
+                                   query (utils.search/constrain-query %)]
+                              (om/set-state! owner :render-text (utils.search/find text query)))
                     :search-dir #(let [cur-idx (om/get-state owner :result-idx)
                                        search-text (om/get-state owner :render-text)
                                        next-idx (next-search-idx % cur-idx search-text)]
-                                  (om/set-state! owner :result-idx next-idx)
-                                  (prn "next" next-idx)
-                                  #_(om/update-state! owner :result-idx (fn [cur-idx]
-                                                                        )))))
+                                  (om/set-state! owner :result-idx next-idx))))
     om/IRenderState
     (render-state [_ {:keys [render-text review-draft result-idx]}]
-      (let [render-text (update render-text result-idx assoc :selected? true)]
+      (let [render-text (if searching?
+                          (update render-text result-idx assoc :selected? true)
+                          render-text)]
         ;; todo enable selected search results and go back and forth between them
         (prn (map keys render-text))
         (html [:div {:style styles/reviewer-view}
