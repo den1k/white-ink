@@ -19,7 +19,7 @@
         {:review-drafts review-drafts
          :review-draft  review-draft
          :render-text   [review-draft]
-         :result-idx    nil}))
+         :result-idx    0}))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
@@ -27,7 +27,7 @@
                                    query (utils.search/constrain-query %)]
                               (when-let [results (utils.search/find text query)]
                                 ;; find first visible result on i-did-update and set idx to it
-                                (om/set-state! owner :result-idx nil)
+                                (om/set-state! owner :result-idx 0)
                                 (om/set-state! owner :render-text results)))
                     :search-dir #(let [cur-idx (om/get-state owner :result-idx)
                                        search-text (om/get-state owner :render-text)

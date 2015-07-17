@@ -32,14 +32,11 @@
     ""
     q))
 
-
 (def count-until-search-res
   (partial utils/count-until-pred :res))
 
 (defn next-res-idx [dir cur-idx search-results]
-  ;(prn "dir" dir)
-  ;(prn "cur-idx" cur-idx)
-  ;(prn "count" (count search-results))
+  {:pre [(number? cur-idx)]}
   (let [steps (case dir
                 :forward (->> (inc cur-idx)
                               (subvec search-results)
@@ -51,7 +48,6 @@
                               inc
                               -))
         next-idx (+ cur-idx steps)]
-    ;(prn "next idx" next-idx)
     (cond
       ; going backwards and no more results
       (neg? next-idx) (next-res-idx dir (count search-results) search-results)
