@@ -5,7 +5,8 @@
             [white-ink.styles.styles :as styles]
             [white-ink.components.notepad :refer [notepad-reviewer]]
             [white-ink.utils.search :as utils.search]
-            [white-ink.components.search :as search])
+            [white-ink.components.search :as search]
+            [white-ink.utils.dom :as utils.dom])
   (:require-macros [white-ink.macros :refer [process-task]]))
 
 (defn reviewer-view [{:keys [searching?] :as data} owner]
@@ -20,6 +21,15 @@
          :review-draft  review-draft
          :render-text   [review-draft]
          :result-idx    0}))
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (let [parent (om/get-node owner "review-draft")
+            result-idx (om/get-state owner :result-idx)]
+        (if-not result-idx
+          ;; can use om/update and set if not nil
+          (om/set-state! owner :result-idx
+                         (utils.dom/first-visible-or-closest-idx parent)))
+        ))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
@@ -27,7 +37,7 @@
                                    query (utils.search/constrain-query %)]
                               (when-let [results (utils.search/find text query)]
                                 ;; find first visible result on i-did-update and set idx to it
-                                (om/set-state! owner :result-idx 0)
+                                (om/set-state! owner :result-idx nil)
                                 (om/set-state! owner :render-text results)))
                     :search-dir #(let [cur-idx (om/get-state owner :result-idx)
                                        search-text (om/get-state owner :render-text)
@@ -42,7 +52,8 @@
         ;(prn (map keys render-text))
         (html [:div {:style styles/reviewer-view}
                [:div
-                {:style (if-not searching?
+                {:ref "review-draft"
+                 :style (if-not searching?
                           styles/reviewer-text
                           styles/reviewer-text-on-search)}
                 (search/results render-text)]

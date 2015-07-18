@@ -30,7 +30,10 @@
       :else (.error js/console "Unknown case:" (clj->js exp)))))
 
 (defn count-until-pred [pred coll]
-  (reduce (fn [c item]
-            (if (pred item)
-              (reduced c)
-              (inc c))) 0 coll))
+  (let [res (reduce (fn [c item]
+                      (if (pred item)
+                        (reduced c)
+                        (inc c))) 0 coll)]
+    (if (= res (count coll))
+      nil
+      res)))

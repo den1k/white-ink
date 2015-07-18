@@ -33,7 +33,9 @@
     om/IRender
     (render [_]
       (html [:span
-             {:style (if selected?
+             ;; todo make classnames consts, move to own ns
+             {:class-name "search-res"
+              :style (if selected?
                        (assoc styles/search-result
                          :background "skyblue")
                        styles/search-result)}

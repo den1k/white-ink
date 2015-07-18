@@ -1,6 +1,11 @@
 (ns white-ink.utils.dom
   (:require [goog.style :as gstyle]
-            [goog.fx.dom :as gdom]))
+            [goog.fx.dom :as gdom]
+            [white-ink.utils.utils :refer [count-until-pred]]))
+
+(extend-type js/HTMLCollection
+  ISeqable
+  (-seq [array] (array-seq array 0)))
 
 (defn set-selection [node start end]
   (let [range (doto
@@ -19,11 +24,22 @@
   (let [node (or (.-lastElementChild node) node)]
     (set-cursor node (count (.-textContent node)))))
 
+(defn visible?
+  "Returns a boolean if the element is visible within it's parent container
+  or the passed in parent. Potential bottleneck b/c getBoundingClientRect
+  is called each time."
+  ([elem]
+   (visible? elem (.. elem -parentNode)))
+  ([elem parent]
+   (let [elem-top (.. elem getBoundingClientRect -top)
+         parent-rect (.. parent getBoundingClientRect)]
+     (< (dec (.-top parent-rect)) elem-top (.-bottom parent-rect)))))
+
 (defn scroll-into-view [elem view-divider]
   (let [me elem
         me-top (.. me getBoundingClientRect -top)
         parent (.. me -parentNode)
-        parent-rect (.. me -parentNode getBoundingClientRect)
+        parent-rect (.. parent getBoundingClientRect)
         parent-height (.. parent-rect -height)
         divider-height (/ parent-height view-divider)
         bottom-divider-line (- (.-bottom parent-rect) divider-height)
@@ -37,3 +53,30 @@
               :else y)]
       (.play (gdom/Scroll. parent #js [0 parent-scroll-top] #js [0 y] 100))
       #_(gstyle/scrollIntoContainerView me parent))))
+
+(defn css-class? [name elem]
+  (= name (.-className elem)))
+
+;; todo move to a dom-selectors namespace or something.
+(def search-res-node?
+  (partial css-class? "search-res"))
+
+(defn first-visible-idx
+  ([elems] (first-visible-idx identity elems))
+  ([pred elems]
+   (count-until-pred (every-pred visible? pred) elems)))
+
+(defn next-closest-idx
+  ([parent] (next-closest-idx identity parent))
+  ([pred parent]
+   (let [distance (+ (.-offsetTop parent) (.-scrollTop parent))
+         children (.-children parent)
+         stop (fn [child] (> (.-offsetTop child) distance))]
+     (count-until-pred (every-pred stop pred) children))))
+
+(defn first-visible-or-closest-idx
+  ([parent] (first-visible-or-closest-idx identity parent))
+  ([pred parent]
+   (let [children (.-children parent)]
+     (or (first-visible-idx search-res-node? children)
+         (next-closest-idx parent)))))

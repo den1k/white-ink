@@ -37,20 +37,18 @@
 
 (defn next-res-idx [dir cur-idx search-results]
   {:pre [(number? cur-idx)]}
-  (let [steps (case dir
-                :forward (->> (inc cur-idx)
-                              (subvec search-results)
-                              count-until-search-res
-                              inc)
-                :backward (-> (subvec search-results 0 cur-idx)
-                              reverse
-                              count-until-search-res
-                              inc
-                              -))
+  (let [max-idx (dec (count search-results))
+        steps (case dir
+                :forward 2
+                :backward -2)
         next-idx (+ cur-idx steps)]
     (cond
       ; going backwards and no more results
-      (neg? next-idx) (next-res-idx dir (count search-results) search-results)
+      (neg? next-idx) (->> search-results
+                           reverse
+                           count-until-search-res
+                           (- max-idx)) #_(next-res-idx dir (count search-results) search-results)
       ; passed in cur idx lies outside of search-results
-      (> next-idx (dec (count search-results))) (next-res-idx dir 0 search-results)
+      (> next-idx max-idx) (-> search-results
+                               count-until-search-res)
       :else next-idx)))
