@@ -7,25 +7,22 @@
             [cljs.core.async :as async]
             [white-ink.utils.text :as text]
             [white-ink.styles.styles :as styles]
+            [white-ink.utils.data :as data]
             [dommy.core :as dommy]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [process-task]]))
 
-(defn editor [current-draft owner]
+(defn editor [data owner]
   (reify
     om/IDisplayName
     (display-name [_] "editor")
-    om/IInitState
-    (init-state [_]
-      {:text          (:text current-draft)
-       :should-update true})
     om/IWillMount
     (will-mount [_]
       (do
         (process-task :editor
                       :focus #(utils.dom/set-cursor-to-end (om/get-node owner "text")))
-        ;todo refactor to fn
+        ;todo refactor to process task fn
         (let [tx-sub (async/sub (:tx-chan (om/get-shared owner)) :editor (async/chan))]
           (async/go-loop []
                          (when-let [tx (async/<! tx-sub)]
@@ -44,11 +41,14 @@
           (utils.dom/set-cursor (om/get-node owner "text") (count new-text)))))
     om/IRenderState
     (render-state [_ {:keys [text]}]
-      (html [:div
-             [:div {:style styles/editor-text
+      (html [:div {:on-click #(utils.dom/set-cursor-to-end (om/get-node owner "text"))}
+             (when (:text-grain (data/settings data))
+               [:div {:class-name "grain"
+                      :style      {:height 200
+                                   :width  500}}])
+             [:div {:style            styles/editor-text
                     :ref              "text"
                     :content-editable true
-                    :on-click         #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
                     :on-key-down      #(handle-shortcuts :editor %)
                     ; todo om/update is too slow on fast typing. Maybe diff impl. will be faster.
                     :on-key-up        (fn [e]

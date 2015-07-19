@@ -25,7 +25,7 @@
     (did-update [_ _ _]
       (let [parent (om/get-node owner "review-draft")
             result-idx (om/get-state owner :result-idx)]
-        (if-not result-idx
+        (when (and searching? (nil? result-idx))
           ;; can use om/update and set if not nil
           (om/set-state! owner :result-idx
                          (utils.dom/first-visible-or-closest-idx parent)))

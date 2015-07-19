@@ -5,3 +5,9 @@
 
 (defn review-drafts [data]
   (-> data :drafts butlast))
+
+(defn user [data]
+  (-> data :user))
+
+(defn settings [data]
+  (-> data user :settings))

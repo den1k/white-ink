@@ -9,8 +9,7 @@
 (defn editor-view [data owner]
   (om/component
     (let [current-draft (-> data data/current-draft)]
-      (html [:div
-             [:button {:on-click #(om/update! current-draft :text "horses in nevada" :editor)} "update text externally"]
-             [:div {:style styles/editor-view}
-              (om/build editor current-draft)
-              (om/build notepad-editor current-draft)]]))))
+      (html
+        [:div {:style styles/editor-view}
+         (om/build editor data {:state current-draft})
+         (om/build notepad-editor current-draft)]))))
