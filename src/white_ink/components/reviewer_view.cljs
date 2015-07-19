@@ -20,6 +20,7 @@
         {:review-drafts review-drafts
          :review-draft  review-draft
          :render-text   [review-draft]
+         ;(prn (map keys render-text))
          :result-idx    0}))
     om/IDidUpdate
     (did-update [_ _ _]
@@ -39,17 +40,17 @@
                                 ;; find first visible result on i-did-update and set idx to it
                                 (om/set-state! owner :result-idx nil)
                                 (om/set-state! owner :render-text results)))
-                    :search-dir #(let [cur-idx (om/get-state owner :result-idx)
-                                       search-text (om/get-state owner :render-text)
-                                       next-idx (utils.search/next-res-idx % cur-idx search-text)]
-                                  (om/set-state! owner :result-idx next-idx))))
+                    :search-dir (fn [dir]
+                                  (let [search-text (om/get-state owner :render-text)]
+
+                                    (om/update-state! owner
+                                                      :result-idx
+                                                      (fn [idx] (and idx (utils.search/next-res-idx dir idx search-text))))))))
     om/IRenderState
     (render-state [_ {:keys [render-text review-draft result-idx]}]
       (let [render-text (if (and searching? result-idx)
                           (update render-text result-idx assoc :selected? true)
                           render-text)]
-        ;; todo enable selected search results and go back and forth between them
-        ;(prn (map keys render-text))
         (html [:div {:style styles/reviewer-view}
                [:div
                 {:ref "review-draft"

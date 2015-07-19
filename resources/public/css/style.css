@@ -93,3 +93,18 @@ html {
     z-index: 0;
 }
 
+/*.review-draft:before {*/
+    /*background: none;*/
+    /*transition: all*/
+
+    /*5s ease;*/
+/*}*/
+
+/*.review-draft.empty-search-results:before {*/
+    /*content: '';*/
+    /*pointer-events: none;*/
+    /*background: radial-gradient(white, rgba(255, 255, 255, 0.8));*/
+    /*position: absolute;*/
+    /*width: inherit;*/
+    /*height: inherit;*/
+/*}*/
