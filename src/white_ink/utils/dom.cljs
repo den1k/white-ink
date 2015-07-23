@@ -79,4 +79,4 @@
   ([pred parent]
    (let [children (.-children parent)]
      (or (first-visible-idx search-res-node? children)
-         (next-closest-idx parent)))))
+         (next-closest-idx search-res-node? parent)))))

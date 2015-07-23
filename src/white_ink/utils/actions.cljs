@@ -24,6 +24,7 @@
                              [[:key-down :search :left-bracket]] (put! tasks [:reviewer :search-dir :backward] )
 
                              [[:reviewer :search query]] (put! tasks [:reviewer :search query])
+                             [[:reviewer :scroll-to idx]] (put! tasks [:reviewer :scroll-to idx])
 
                              [[:toggle-search]] (do (when (:searching? @app-state)
                                                       (put! tasks [:editor :focus]))

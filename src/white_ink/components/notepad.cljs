@@ -6,7 +6,8 @@
             [white-ink.utils.state :refer [make-squuid]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [white-ink.styles.styles :as styles])
-  (:require-macros [white-ink.macros :refer [process-task]]))
+  (:require-macros [white-ink.macros :refer [process-task
+                                             send-action!]]))
 
 (defn notepad-editor [{:keys [notes] :as draft} owner]
   (reify
@@ -49,6 +50,7 @@
     (html [:div
            [:h6 "notepad-reviewer"]
            [:ul (for [note notes]
-                  [:li {:key   (:id note)
-                        :style styles/note-reviewer}
+                  [:li {:key      (:id note)
+                        :style    styles/note-reviewer
+                        :on-click #(send-action! :reviewer :scroll-to (:draft-index note))}
                    (:text note)])]])))

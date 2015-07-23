@@ -1,4 +1,5 @@
-(ns white-ink.styles.styles)
+(ns white-ink.styles.styles
+  (:require [white-ink.styles.typography :as typo]))
 
 (def ^:const texts-and-notepad
   {:display        :flex
@@ -11,13 +12,17 @@
   (merge texts-and-notepad {}))
 
 (def ^:const editor-text
-  (merge texts {:height   200
-                :overflow "auto"
-                :outline  "none"}))
+  (merge typo/write-1
+         texts
+         {:height   200
+          :overflow "auto"
+          :outline  "none"}))
 
 (def ^:const reviewer-text
-  (merge texts {:height   400
-                :overflow "auto"}))
+  (merge typo/write-1
+         texts
+         {:height   400
+          :overflow "auto"}))
 
 (def ^:const reviewer-view
   (merge texts-and-notepad {:marginTop 10}))
@@ -29,7 +34,9 @@
   {:outline "none"})
 
 (def ^:const note-reviewer
-  (dissoc note-editor :outline))
+  (-> note-editor
+      (dissoc :outline)
+      (assoc :cursor "pointer")))
 
 (def ^:const reviewer-text-on-search
   (assoc reviewer-text :color "silver"))

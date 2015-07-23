@@ -5,7 +5,7 @@
 
 (defn find [text query]
   (if (utils.text/empty-or-whitespace? query)
-    [{:text text}]
+    [[:text text]]
     (let [q (.toLowerCase query)                            ; case insensitive
           q-len (count q)
           t-len (count text)
@@ -15,13 +15,14 @@
           (if-not (= -1 i)
             (let [end-idx (+ i q-len)]
               (recur end-idx
-                     (let [to-out (if-not (= prev-idx i)
-                                    [{:text (subs text prev-idx i)}
-                                     {:res (subs text i end-idx)}]
-                                    [{:res (subs text i end-idx)}])]
-                       (into out to-out))))
+                     (if-not (= prev-idx i)
+                       (conj out
+                             [:text (subs text prev-idx i)]
+                             [:res (subs text i end-idx)])
+                       (conj out [:res (subs text i end-idx)]))))
+            ;; last text segment
             (if-not (= prev-idx t-len)
-              (conj out {:text (subs text prev-idx)})
+              (conj out [:text (subs text prev-idx)])
               ;; return nil if no results
               (if (< 1 (count out))
                 out
@@ -32,8 +33,11 @@
     ""
     q))
 
+(defn search-res? [item]
+  (= :res (first item)))
+
 (def count-until-search-res
-  (partial utils/count-until-pred :res))
+  (partial utils/count-until-pred search-res?))
 
 (defn next-res-idx [dir cur-idx search-results]
   {:pre [(number? cur-idx)]}

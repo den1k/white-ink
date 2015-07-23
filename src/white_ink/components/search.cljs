@@ -35,20 +35,29 @@
       (html [:span
              ;; todo make classnames consts, move to own ns
              {:class-name "search-res"
-              :style (if selected?
-                       (assoc styles/search-result
-                         :background "skyblue")
-                       styles/search-result)}
+              :style      (if selected?
+                            (assoc styles/search-result
+                              :background "skyblue"
+                              :borderRadius 2)
+                            styles/search-result)}
              text]))))
 
+(defn scroll-target [_ owner]
+  (reify
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (utils.dom/scroll-into-view (om/get-node owner) 7))
+    om/IRender
+    (render [_]
+      (html [:span#scroll-target ""]))))
 
 (defn results [results]
   (for [[idx res] (map-indexed vector results)
-        :let [search-res (:res res)
-              selected? (:selected? res)]]
-    (if search-res
-      (om/build result [search-res selected?] {:react-key idx})
-      (om/build (fn [_ owner]
-                  (om/component
-                    (html [:span
-                           (:text res)]))) nil {:react-key idx}))))
+        :let [[type text selected?] res]]
+    (case type
+      :res (om/build result [text selected?] {:react-key idx})
+      :text (om/build (fn [_ owner]
+                        (om/component
+                          (html [:span
+                                 text]))) nil {:react-key idx})
+      :scroll-target (om/build scroll-target text {:react-key idx}))))

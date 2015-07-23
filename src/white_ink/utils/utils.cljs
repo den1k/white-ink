@@ -37,3 +37,23 @@
     (if (= res (count coll))
       nil
       res)))
+
+
+(defn idx-of-container-and-containing-item
+  "Given a coll of colls, sums the length of each item with key of k
+  until stop-idx.
+  Returns the path as [idx-of-containing, k, idx-of-val],
+  forming the equivalent of stop-idx in a coll of colls."
+  [k stop-idx coll]
+  (reduce
+    (fn [[p-idx _ p-count] container]
+      (let [val-length (count (get container k))
+            total (+ p-count val-length)
+            next-idx (inc p-idx)]
+        (if (> total stop-idx)
+          (do
+            (prn "total" total)
+            (reduced [next-idx k (- val-length (- total stop-idx))]))
+          [next-idx k total])))
+    [-1 0]
+    coll))
