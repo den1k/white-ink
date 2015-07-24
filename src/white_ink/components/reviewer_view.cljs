@@ -72,9 +72,7 @@
         (html
           [:div
            {:ref   "review-draft"
-            :style (if-not searching?
-                     styles/reviewer-text
-                     styles/reviewer-text-on-search)}
+            :style styles/reviewer-text}
            (search/results render-text)])))))
 
 

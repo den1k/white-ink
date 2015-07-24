@@ -35,24 +35,30 @@
          parent-rect (.. parent getBoundingClientRect)]
      (< (dec (.-top parent-rect)) elem-top (.-bottom parent-rect)))))
 
-(defn scroll-into-view [elem view-divider]
-  (let [me elem
-        me-top (.. me getBoundingClientRect -top)
-        parent (.. me -parentNode)
-        parent-rect (.. parent getBoundingClientRect)
-        parent-height (.. parent-rect -height)
-        divider-height (/ parent-height view-divider)
-        bottom-divider-line (- (.-bottom parent-rect) divider-height)
-        parent-scroll-top (.-scrollTop parent)
-        ;visible? (< (.-top parent-rect) me-top (.-bottom parent-rect))
-        me-offset? (> me-top bottom-divider-line)]
-    (let [y (.-y (gstyle/getContainerOffsetToScrollInto me parent))
-          y (cond
-              me-offset? (+ divider-height y)
-              (< y parent-scroll-top) (- y divider-height)
-              :else y)]
-      (.play (gdom/Scroll. parent #js [0 parent-scroll-top] #js [0 y] 100))
-      #_(gstyle/scrollIntoContainerView me parent))))
+(defn scroll-into-view
+  "Scrolls an element into the visible bounds of it's parent.
+  View divider will scroll it into view even if it is already visible, a value of 5
+  will scroll it up if it's in the lower 5th of the parent.
+  Dur is the duration of the animated scroll."
+  ([elem view-divider] (scroll-into-view elem view-divider 100))
+  ([elem view-divider dur]
+   (let [me elem
+         me-top (.. me getBoundingClientRect -top)
+         parent (.. me -parentNode)
+         parent-rect (.. parent getBoundingClientRect)
+         parent-height (.. parent-rect -height)
+         divider-height (/ parent-height view-divider)
+         bottom-divider-line (- (.-bottom parent-rect) divider-height)
+         parent-scroll-top (.-scrollTop parent)
+         ;visible? (< (.-top parent-rect) me-top (.-bottom parent-rect))
+         me-offset? (> me-top bottom-divider-line)]
+     (let [y (.-y (gstyle/getContainerOffsetToScrollInto me parent))
+           y (cond
+               me-offset? (+ divider-height y)
+               (< y parent-scroll-top) (- y divider-height)
+               :else y)]
+       (.play (gdom/Scroll. parent #js [0 parent-scroll-top] #js [0 y] dur))
+       #_(gstyle/scrollIntoContainerView me parent)))))
 
 (defn css-class? [name elem]
   (= name (.-className elem)))

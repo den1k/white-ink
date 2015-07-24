@@ -7,6 +7,12 @@ html {
     box-sizing: inherit;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 @-webkit-keyframes grain {
     0%, 100% {
         -moz-transform: translate(0, 0);
@@ -27,16 +33,16 @@ html {
         transform: translate(-15%, 5%);
     }
     30% {
-        -moz-transform: translate(7%, -25%);
-        -ms-transform: translate(7%, -25%);
-        -webkit-transform: translate(7%, -25%);
-        transform: translate(7%, -25%);
+        -moz-transform: translate(7%, -15%);
+        -ms-transform: translate(7%, -15%);
+        -webkit-transform: translate(7%, -15%);
+        transform: translate(7%, -15%);
     }
     40% {
-        -moz-transform: translate(-5%, 25%);
-        -ms-transform: translate(-5%, 25%);
-        -webkit-transform: translate(-5%, 25%);
-        transform: translate(-5%, 25%);
+        -moz-transform: translate(-5%, 5%);
+        -ms-transform: translate(-5%, 5%);
+        -webkit-transform: translate(-5%, 5%);
+        transform: translate(-5%, 5%);
     }
     50% {
         -moz-transform: translate(-15%, 10%);
@@ -72,6 +78,7 @@ html {
 
 .grain {
     position: absolute;
+    /*z-index: -1;*/
 }
 
 :not(.grain) > * {
@@ -82,6 +89,7 @@ html {
 .grain:after {
     animation: grain 1s steps(3) infinite;
     background: url(https://www.dropbox.com/s/hpthnpl0fl0nb61/vintage-speckles-trans.png?dl=1);
+    /*background: orange;*/
     background-size: 8%;
     opacity: 0.8;
     content: "";
@@ -90,21 +98,64 @@ html {
     position: absolute;
     top: -200%;
     width: 300%;
-    z-index: 0;
+    /*z-index: 0;*/
+}
+
+.reviewable.note {
+    transition: color 0.2s ease-out;
+}
+
+.reviewable.note:hover {
+    border-radius: 2px;
+    color: darkslategray !important;
 }
 
 /*.review-draft:before {*/
-    /*background: none;*/
-    /*transition: all*/
+/*background: none;*/
+/*transition: all*/
 
-    /*5s ease;*/
+/*5s ease;*/
+/*}*/
+/*.review-draft.empty-search-results {*/
+/*animation-name: blinker;*/
+/*animation-duration: 3s;*/
+/*animation-timing-function: ease;*/
+/*animation-iteration-count: 1;*/
+/*}*/
+/*@keyframes blinker {*/
+/*0% {background: radial-gradient(red, rgba(0, 255, 255, 0));}*/
+/*50% {background: radial-gradient(rgba(0, 255, 255, 0), rgba(0, 255, 255, 1));}*/
+/*100% {background: radial-gradient(rgba(0, 255, 255, 1), rgba(0, 255, 255, 0));}*/
+/*/!*0% { opacity: 1.0; }*!/*/
+/*/!*50% { opacity: 0.0; }*!/*/
+/*/!*100% { opacity: 1.0; }*!/*/
+/*}*/
+/*.review-draft.empty-search-results:before {*/
+/*content: '';*/
+/*pointer-events: none;*/
+/*/!*background: radial-gradient(white, rgba(255, 255, 255, 0.8));*!/*/
+/*position: absolute;*/
+/*width: inherit;*/
+/*height: inherit;*/
+/*}*/
+
+/*animating gradients to flat colors - a bit complex*/
+/*@keyframes topflat {*/
+/*100% {background-color: black;}*/
 /*}*/
 
 /*.review-draft.empty-search-results:before {*/
-    /*content: '';*/
-    /*pointer-events: none;*/
-    /*background: radial-gradient(white, rgba(255, 255, 255, 0.8));*/
-    /*position: absolute;*/
-    /*width: inherit;*/
-    /*height: inherit;*/
+/*color: #999;*/
+/*position: absolute;*/
+/*content: '';*/
+/*pointer-events: none;*/
+/*width: inherit;*/
+/*height: inherit;*/
+/*/!*a white-transparent gradient above black base, making it a white-black gradient*!/*/
+/*/!*background-image: radial-gradient(rgba(255, 255, 255, 0), white);*!/*/
+/*animation: emptyness 1s 1 alternate;*/
+/*}*/
+/*@keyframes emptyness {*/
+/*0% {background: white;}*/
+/*100% {opacity: 0;}*/
 /*}*/

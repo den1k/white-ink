@@ -10,6 +10,6 @@
   (om/component
     (let [current-draft (-> data data/current-draft)]
       (html
-        [:div {:style styles/editor-view}
+        [:div {:style (styles/editor-view (:searching? data))}
          (om/build editor data {:state current-draft})
          (om/build notepad-editor current-draft)]))))

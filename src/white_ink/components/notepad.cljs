@@ -30,7 +30,6 @@
     om/IRenderState
     (render-state [_ _]
       (html [:div
-             [:h6 "notepad-editor"]
              [:ul {:ref "notes"}
               (for [note notes]
                 [:li
@@ -48,9 +47,10 @@
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
   (om/component
     (html [:div
-           [:h6 "notepad-reviewer"]
            [:ul (for [note notes]
                   [:li {:key      (:id note)
+                        :class-name "reviewable note"
                         :style    styles/note-reviewer
-                        :on-click #(send-action! :reviewer :scroll-to (:draft-index note))}
+                        :on-click #(do (send-action! :reviewer :scroll-to (:draft-index note))
+                                       (.preventDefault %))}
                    (:text note)])]])))

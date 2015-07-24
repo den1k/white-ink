@@ -46,7 +46,7 @@
   (reify
     om/IDidUpdate
     (did-update [_ _ _]
-      (utils.dom/scroll-into-view (om/get-node owner) 7))
+      (utils.dom/scroll-into-view (om/get-node owner) 7 500))
     om/IRender
     (render [_]
       (html [:span#scroll-target ""]))))
