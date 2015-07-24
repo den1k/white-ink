@@ -86,7 +86,13 @@ html, body {
     /*background: orange;*/
 }
 
-.grain:after {
+.editor > .gradient {
+    position: absolute;
+    /*background: blue;*/
+    background: linear-gradient(rgba(0, 0, 0, 0), #fff 0%, rgba(255, 255, 255, 0.7) 17%, rgba(255, 255, 255, 0) 100%);
+}
+
+.editor > .grain:after {
     animation: grain 1s steps(3) infinite;
     background: url(https://www.dropbox.com/s/hpthnpl0fl0nb61/vintage-speckles-trans.png?dl=1);
     /*background: orange;*/
@@ -98,7 +104,6 @@ html, body {
     position: absolute;
     top: -200%;
     width: 300%;
-    /*z-index: 0;*/
 }
 
 .reviewable.note {

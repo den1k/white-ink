@@ -41,11 +41,14 @@
           (utils.dom/set-cursor (om/get-node owner "text") (count new-text)))))
     om/IRenderState
     (render-state [_ {:keys [text]}]
-      (html [:div {:on-click #(utils.dom/set-cursor-to-end (om/get-node owner "text"))}
+      (html [:div {:on-click #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
+                   :class-name "editor"}
              (when (:text-grain (data/settings data))
                [:div {:class-name "grain"
                       :style      {:height 200
                                    :width  500}}])
+             [:div {:class-name "gradient"
+                    :style (select-keys styles/editor-text [:width :height])} ""]
              [:div {:style            styles/editor-text
                     :ref              "text"
                     :content-editable true

@@ -8,7 +8,7 @@
    :justifyContent :space-around})
 
 (def ^:const texts
-  {:width 500})
+  {:width 550})
 
 (defn editor-view [searching?]
   (merge texts-and-notepad
