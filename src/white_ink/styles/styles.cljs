@@ -5,40 +5,84 @@
 
 (def ^:const texts-and-notepad
   {:display        :flex
-   :justifyContent :space-around})
+   :justifyContent :space-around
+   :alignItems     :center})
 
-(def ^:const texts
-  {:width 550})
+(def editor-height
+  (utils.styles/lines->total-height 8 typo/write-1))
+
+(def reviewer-height
+  (utils.styles/lines->total-height 18 typo/write-1))
 
 (defn editor-view [searching?]
   (merge texts-and-notepad
-         {:transition "opacity 0.5s ease"}
+         {:marginTop  (utils.styles/lines->total-height 1.5 typo/write-1)
+          :height     editor-height
+          :transition "opacity 0.5s ease"}
          (when searching?
            {:opacity 0.2})))
 
+(def editor-reviewer
+  {:display    "flex"
+   :flexBasis  450
+   :maxWidth   550
+   :flexGrow   "3"
+   :flexShrink "0"})
+
 (def ^:const editor-text
   (merge typo/write-1
-         texts
-         {:height   (utils.styles/lines->line-height 8 typo/write-1)
-          :overflow "auto"
-          :outline  "none"}))
+         {:overflow "auto"
+          :outline  "none"
+          :height editor-height}))
 
 (def ^:const reviewer-text
   (merge typo/write-1
-         texts
-         {:height   (utils.styles/lines->line-height 18 typo/write-1)
+         {:height   reviewer-height
           :overflow "auto"
           :color    colors/reviewable-text}))
 
 (def ^:const reviewer-view
   (merge texts-and-notepad
-         {:marginTop (utils.styles/lines->line-height 2 typo/write-1)}))
+         {:marginTop (utils.styles/lines->total-height 2 typo/write-1)}))
 
-(def ^:const notepad
-  {})
+(def ^:const ^:private notepad
+  {:display       "flex"
+   :flexDirection "column"
+   :alignItems    "flex-start"
+   :flexBasis     150
+   :maxWidth      220
+   :flexGrow      "1"
+   :flexShrink    "0"
+   :paddingRight  9
+   :overflowX     "hidden"
+   :overflowY     "scroll"
+   :direction     "rtl"})
+
+(def notepad-editor
+  (assoc notepad
+    :height (utils.styles/full-lines-in-height editor-height
+                                               typo/write-3
+                                               0.7)))
+
+(def notepad-reviewer
+  (assoc notepad
+    :height (utils.styles/full-lines-in-height reviewer-height
+                                               typo/write-3
+                                               0.7)))
+
+
+(def ^:const note
+  {:flexShrink    "0"
+   :paddingLeft   9
+   :maxWidth      "inherit"
+   :position      "relative"
+   :textAlign     "right"
+   :listStyleType "none"
+   :direction     "ltr"})
 
 (def ^:const note-editor
-  (merge typo/write-3
+  (merge note
+         typo/write-3
          {:outline "none"}))
 
 (def ^:const note-reviewer

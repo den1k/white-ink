@@ -70,10 +70,11 @@
                                 scroll-target-idx (split-result scroll-target-idx)
                                 )]
         (html
-          [:div
-           {:ref   "review-draft"
-            :style styles/reviewer-text}
-           (search/results render-text)])))))
+          [:div {:style styles/editor-reviewer}
+           [:div
+            {:ref   "review-draft"
+             :style styles/reviewer-text}
+            (search/results render-text)]])))))
 
 
 

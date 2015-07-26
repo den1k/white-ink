@@ -42,7 +42,8 @@
     om/IRenderState
     (render-state [_ {:keys [text]}]
       (html [:div {:on-click #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
-                   :class-name "editor"}
+                   :class-name "editor"
+                   :style styles/editor-reviewer}
              (when (:text-grain (data/settings data))
                [:div {:class-name "grain"
                       :style      {:height 200
