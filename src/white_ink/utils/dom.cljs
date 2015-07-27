@@ -1,7 +1,8 @@
 (ns white-ink.utils.dom
   (:require [goog.style :as gstyle]
             [goog.fx.dom :as gdom]
-            [white-ink.utils.utils :refer [count-until-pred]]))
+            [white-ink.utils.utils :refer [count-until-pred]]
+            [white-ink.utils.styles.ease :refer [ease]]))
 
 (extend-type js/HTMLCollection
   ISeqable
@@ -40,7 +41,8 @@
   View divider will scroll it into view even if it is already visible, a value of 5
   will scroll it up if it's in the lower 5th of the parent.
   Dur is the duration of the animated scroll."
-  ([elem view-divider] (scroll-into-view elem view-divider 100))
+  ([elem] (scroll-into-view elem 1 100))
+  ([elem dur] (scroll-into-view elem 1 dur))
   ([elem view-divider dur]
    (let [me elem
          me-top (.. me getBoundingClientRect -top)
@@ -57,8 +59,12 @@
                me-offset? (+ divider-height y)
                (< y parent-scroll-top) (- y divider-height)
                :else y)]
-       (.play (gdom/Scroll. parent #js [0 parent-scroll-top] #js [0 y] dur))
-       #_(gstyle/scrollIntoContainerView me parent)))))
+       (.play
+         (gdom/Scroll. parent
+                       #js [0 parent-scroll-top]
+                       #js [0 y]
+                       dur
+                       (ease :cubic-in-out)))))))
 
 (defn css-class? [name elem]
   (= name (.-className elem)))

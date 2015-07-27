@@ -29,7 +29,7 @@
     om/IDidUpdate
     (did-update [_ _ _]
       (when selected?
-        (utils.dom/scroll-into-view (om/get-node owner) 7)))
+        (utils.dom/scroll-into-view (om/get-node owner) 7 100)))
     om/IRender
     (render [_]
       (html [:span

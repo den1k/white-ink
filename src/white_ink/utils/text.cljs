@@ -29,3 +29,6 @@
   (when-not (empty-or-whitespace? string)
     string))
 
+(def trim
+  "Trims white spaces to the left and right of a string."
+  (comp gstring/trim gstring/collapseBreakingSpaces))

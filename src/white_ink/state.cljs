@@ -10,14 +10,14 @@
     (vec (map #(hash-map :id (make-squuid)
                         :text (str "note " %)
                         :draft-index %2)
-              (range 1 n)
+              (range 1 (inc n))
               draft-idxs))))
 
-(def mock-notes-reviewable (notes-gen 14 (drafts :reviewable)))
 (def mock-notes-editable (notes-gen 14 (drafts :editable)))
+(def mock-notes-reviewable (notes-gen 14 (drafts :reviewable)))
 
 ;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:user       {:settings {:text-grain false}}
+(defonce app-state (atom {:user       {:settings {:text-grain true}}
                           :searching? false
                           :drafts     [{:text  (drafts :reviewable)
                                         :notes mock-notes-reviewable}

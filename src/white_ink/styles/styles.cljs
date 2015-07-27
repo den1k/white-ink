@@ -1,7 +1,7 @@
 (ns white-ink.styles.styles
   (:require [white-ink.styles.typography :as typo]
             [white-ink.styles.colors :as colors]
-            [white-ink.utils.styles :as utils.styles]))
+            [white-ink.utils.styles.units :as units]))
 
 (def ^:const texts-and-notepad
   {:display        :flex
@@ -9,14 +9,14 @@
    :alignItems     :center})
 
 (def editor-height
-  (utils.styles/lines->total-height 8 typo/write-1))
+  (units/lines->total-height 8 typo/write-1))
 
 (def reviewer-height
-  (utils.styles/lines->total-height 18 typo/write-1))
+  (units/lines->total-height 18 typo/write-1))
 
 (defn editor-view [searching?]
   (merge texts-and-notepad
-         {:marginTop  (utils.styles/lines->total-height 1.5 typo/write-1)
+         {:marginTop  (units/lines->total-height 1.5 typo/write-1)
           :height     editor-height
           :transition "opacity 0.5s ease"}
          (when searching?
@@ -33,6 +33,8 @@
   (merge typo/write-1
          {:overflow "auto"
           :outline  "none"
+          ; z-index for grain
+          :zIndex 0
           :height editor-height}))
 
 (def ^:const reviewer-text
@@ -43,7 +45,7 @@
 
 (def ^:const reviewer-view
   (merge texts-and-notepad
-         {:marginTop (utils.styles/lines->total-height 2 typo/write-1)}))
+         {:marginTop (units/lines->total-height 2 typo/write-1)}))
 
 (def ^:const ^:private notepad
   {:display       "flex"
@@ -60,13 +62,13 @@
 
 (def notepad-editor
   (assoc notepad
-    :height (utils.styles/full-lines-in-height editor-height
+    :height (units/full-lines-in-height editor-height
                                                typo/write-3
                                                0.7)))
 
 (def notepad-reviewer
   (assoc notepad
-    :height (utils.styles/full-lines-in-height reviewer-height
+    :height (units/full-lines-in-height reviewer-height
                                                typo/write-3
                                                0.7)))
 
