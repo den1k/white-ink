@@ -17,7 +17,7 @@
 (def mock-notes-reviewable (notes-gen 14 (drafts :reviewable)))
 
 ;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:user       {:settings {:text-grain true}}
+(defonce app-state (atom {:user       {:settings {:text-grain false}}
                           :searching? false
                           :drafts     [{:text  (drafts :reviewable)
                                         :notes mock-notes-reviewable}

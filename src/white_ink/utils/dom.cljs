@@ -66,6 +66,9 @@
                        dur
                        (ease :cubic-in-out)))))))
 
+(defn scroll-to-bottom [elem]
+  (aset elem "scrollTop" 10e6))
+
 (defn css-class? [name elem]
   (= name (.-className elem)))
 
