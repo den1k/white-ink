@@ -5,8 +5,7 @@
             [cljs.core.async :refer [<! sub chan]]
             [white-ink.utils.state :refer [make-squuid]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
-            [white-ink.styles.styles :as styles]
-            [white-ink.utils.text :as utils.text])
+            [white-ink.styles.styles :as styles])
   (:require-macros [white-ink.macros :refer [process-task
                                              send-action!]]))
 
@@ -28,7 +27,8 @@
       (when (om/get-state owner :focus-last-note)
         (doto (.-lastChild (om/get-node owner "notes"))
           (utils.dom/set-cursor-to-end)
-          (utils.dom/scroll-into-view 500))
+          (utils.dom/scroll-into-view 500)
+          (aset "innerHTML" ""))
         (om/set-state! owner :focus-last-note false)))
     om/IRenderState
     (render-state [_ _]
@@ -42,12 +42,15 @@
              :class-name       "editable note"
              :key              (:id note)
              :style            styles/note-editor
-             ;; todo can be sent to action handler instead
-             :on-blur          #(white-ink.utils.state/save-note! {:note  note
-                                                                   :notes notes
-                                                                   :text  (utils.text/trim (.. % -target -innerText))})
-             :on-key-down      #(handle-shortcuts :notepad-editor {:note        note
-                                                                   :draft-index (count (:text draft))} %)}
+             :on-blur          #(do
+                                 (send-action! :save-note {:note  note
+                                                           :notes notes
+                                                           :text  (.. % -target -innerText)})
+                                 (.preventDefault %))
+             :on-key-press     #(let [txt-cnt (count (.. % -target -innerHTML))]
+                                 (when (> txt-cnt 100)
+                                   (.preventDefault %)))
+             :on-key-down      #(handle-shortcuts :notepad-editor %)}
             (:text note)])]))))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]

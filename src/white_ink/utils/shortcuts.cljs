@@ -18,7 +18,7 @@
   Therefore it is necessary to know which events do prevent and which to let pass."
   {:app            (select-keys key-map [220])
    :editor         (select-keys key-map [9 37 38 39 40])
-   :notepad-editor (select-keys key-map [40 13])
+   :notepad-editor (select-keys key-map [40 13 9])
    :search         (select-keys key-map [221 219])})
 
 (defn get-key [source keycode]

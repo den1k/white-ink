@@ -31,7 +31,7 @@
 
 (def ^:const editor-text
   (merge typo/write-1
-         {:overflow "auto"
+         {:overflow "hidden"
           :outline  "none"
           ; z-index for grain
           :zIndex 0

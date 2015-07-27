@@ -18,10 +18,10 @@
                              [[:key-down :editor :arrow-right]] (constantly nil)
                              [[:key-down :editor :arrow-down]] (constantly nil)
                              ;; todo it persists note, impl refocus editor
-                             [[:key-down :notepad-editor :return opts]] (do (save-note! opts)
-                                                                            (put! tasks [:editor :focus]))
-                             [[:key-down :search :right-bracket]] (put! tasks [:reviewer :search-dir :forward] )
-                             [[:key-down :search :left-bracket]] (put! tasks [:reviewer :search-dir :backward] )
+                             [[:key-down :notepad-editor :return]] (put! tasks [:editor :focus])
+                             [[:key-down :notepad-editor :tab]] (put! tasks [:editor :focus])
+                             [[:key-down :search :right-bracket]] (put! tasks [:reviewer :search-dir :forward])
+                             [[:key-down :search :left-bracket]] (put! tasks [:reviewer :search-dir :backward])
 
                              [[:reviewer :search query]] (put! tasks [:reviewer :search query])
                              [[:reviewer :scroll-to idx]] (put! tasks [:reviewer :scroll-to idx])
@@ -31,6 +31,9 @@
                                                     (om/transact! app-state :searching? not))
                              [[:search-off]] (do (put! tasks [:editor :focus])
                                                  (om/update! app-state :searching? false))
+
+                             [[:save-note note-map]] (do (save-note! note-map)
+                                                         (put! tasks [:editor :focus]))
 
                              :else (.warn js/console "Unknown action: " (clj->js action-vec)))) action-vec)
                    (recur))))
