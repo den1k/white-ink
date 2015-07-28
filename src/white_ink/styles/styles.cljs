@@ -34,8 +34,8 @@
          {:overflow "hidden"
           :outline  "none"
           ; z-index for grain
-          :zIndex 0
-          :height editor-height}))
+          :zIndex   0
+          :height   editor-height}))
 
 (def ^:const reviewer-text
   (merge typo/write-1
@@ -63,14 +63,14 @@
 (def notepad-editor
   (assoc notepad
     :height (units/full-lines-in-height editor-height
-                                               typo/write-3
-                                               0.7)))
+                                        typo/write-3
+                                        0.7)))
 
 (def notepad-reviewer
   (assoc notepad
     :height (units/full-lines-in-height reviewer-height
-                                               typo/write-3
-                                               0.7)))
+                                        typo/write-3
+                                        0.7)))
 
 
 (def ^:const note

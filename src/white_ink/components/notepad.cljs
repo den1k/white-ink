@@ -9,6 +9,31 @@
   (:require-macros [white-ink.macros :refer [process-task
                                              send-action!]]))
 
+(defn editor-note [[note notes] owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:length-limit 100})
+    om/IRenderState
+    (render-state [_ {:keys [length-limit]}]
+      (html
+        [:li
+         {:content-editable true
+          :class-name       "editable note"
+          :key              (:id note)
+          :style            styles/note-editor
+          :on-blur          #(do
+                              (send-action! :save-note {:note  note
+                                                        :notes notes
+                                                        :text  (.. % -target -innerText)})
+                              (.preventDefault %))
+          :on-key-press     #(let [el (.-target %)
+                                   cnt-txt (count (.. % -target -innerText))]
+                              (when (> cnt-txt length-limit)
+                                (.preventDefault %)))
+          :on-key-down      #(handle-shortcuts :notepad-editor %)}
+         (:text note)]))))
+
 (defn notepad-editor [{:keys [notes] :as draft} owner]
   (reify
     om/IInitState
@@ -37,21 +62,7 @@
               :class-name "note-pad"
               :style      styles/notepad-editor}
          (for [note notes]
-           [:li
-            {:content-editable true
-             :class-name       "editable note"
-             :key              (:id note)
-             :style            styles/note-editor
-             :on-blur          #(do
-                                 (send-action! :save-note {:note  note
-                                                           :notes notes
-                                                           :text  (.. % -target -innerText)})
-                                 (.preventDefault %))
-             :on-key-press     #(let [txt-cnt (count (.. % -target -innerHTML))]
-                                 (when (> txt-cnt 100)
-                                   (.preventDefault %)))
-             :on-key-down      #(handle-shortcuts :notepad-editor %)}
-            (:text note)])]))))
+           (om/build editor-note [note notes]))]))))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
   (om/component
