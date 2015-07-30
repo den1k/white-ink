@@ -6,7 +6,8 @@
 (def ^:const texts-and-notepad
   {:display        :flex
    :justifyContent :space-around
-   :alignItems     :center})
+   :alignItems     :center
+   :transition     "opacity 2s ease"})
 
 (def editor-height
   (units/lines->total-height 8 typo/write-1))

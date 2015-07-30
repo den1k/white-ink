@@ -2,7 +2,8 @@
   (:require [om.core :as om]
             [cljs.core.async :refer [>! <! put!]]
             [cljs.core.match :refer-macros [match]]
-            [white-ink.utils.state :refer [save-note!]])
+            [white-ink.utils.state :refer [save-note!]]
+            [white-ink.utils.styles.transition :as trans])
   (:require-macros [cljs.core.async.macros :as async]))
 
 (defn start-actions-handler [{:keys [actions tasks]} app-state]
@@ -35,5 +36,9 @@
                              [[:save-note note-map]] (do (save-note! note-map)
                                                          (put! tasks [:editor :focus]))
 
+                             [[:editor-typing]] (trans/fade :typing app-state)
+                             [[:app-mouse]] (trans/fade :mouse app-state)
+
                              :else (.warn js/console "Unknown action: " (clj->js action-vec)))) action-vec)
                    (recur))))
+

@@ -78,7 +78,7 @@
 
 
 
-(defn reviewer-view [data owner]
+(defn reviewer-view [{:keys [speed->opacity] :as data} owner]
   (reify
     om/IDisplayName
     (display-name [_] "reviewer-view")
@@ -89,6 +89,6 @@
         {:review-draft review-draft}))
     om/IRenderState
     (render-state [_ {:keys [review-draft]}]
-      (html [:div {:style styles/reviewer-view}
+      (html [:div {:style (assoc styles/reviewer-view :opacity speed->opacity)}
              (om/build review-draft-view data)
              (om/build notepad-reviewer review-draft)]))))

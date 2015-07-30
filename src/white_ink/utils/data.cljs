@@ -11,3 +11,6 @@
 
 (defn settings [data]
   (-> data user :settings))
+
+(defn metrics [data]
+  (-> data user :metrics))

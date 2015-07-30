@@ -8,8 +8,8 @@
 (defn- notes-gen [n draft-text]
   (let [draft-idxs (sort (repeatedly n #(rand-int (count draft-text))))]
     (vec (map #(hash-map :id (make-squuid)
-                        :text (str "note " %)
-                        :draft-index %2)
+                         :text (str "note " %)
+                         :draft-index %2)
               (range 1 (inc n))
               draft-idxs))))
 
@@ -17,12 +17,16 @@
 (def mock-notes-reviewable (notes-gen 14 (drafts :reviewable)))
 
 ;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:user       {:settings {:text-grain false}}
-                          :searching? false
-                          :drafts     [{:text  (drafts :reviewable)
-                                        :notes mock-notes-reviewable}
-                                       {:text  (drafts :editable)
-                                        :notes mock-notes-editable}]}))
+(defonce app-state (atom {:user           {:settings {:text-grain false}
+                                           ;; metrics would be individual stats about a used calculated over time
+                                           :metrics {:avg-typing-speed 200}}
+                          :searching?     false
+                          :text-fade-delay 45000
+                          :speed->opacity 1
+                          :drafts         [{:text  (drafts :reviewable)
+                                            :notes mock-notes-reviewable}
+                                           {:text  (drafts :editable)
+                                            :notes mock-notes-editable}]}))
 
 
 

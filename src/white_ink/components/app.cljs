@@ -12,7 +12,7 @@
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [send-action!]]))
 
-(defn app [{:keys [user searching?] :as data} owner]
+(defn app [{:keys [searching? speed->opacity] :as data} owner]
   (reify
     om/IWillMount
     (will-mount [_]
@@ -21,7 +21,10 @@
     om/IRender
     (render [_]
       (html [:div
-             {:on-key-down #(handle-shortcuts :app %)}
+             {:on-key-down   #(handle-shortcuts :app %)
+              :on-mouse-move #(when (> 1 speed->opacity)
+                               (send-action! :app-mouse)
+                               (.preventDefault %))}
              (when searching?
                (om/build search/input data))
              (om/build editor-view data)
