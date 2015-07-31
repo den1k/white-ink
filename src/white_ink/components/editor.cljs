@@ -25,27 +25,29 @@
           utils.dom/scroll-to-bottom
           utils.dom/set-cursor-to-end)))
     om/IRenderState
-    (render-state [_ {:keys [text]}]
-      (html [:div {:on-click   #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
-                   :class-name "editor"
-                   :style      styles/editor-reviewer}
-             (when (:text-grain (data/settings data))
-               [:div {:class-name "grain"
-                      :style      {:height 200
-                                   :width  500}}])
-             [:div {:class-name "gradient"
-                    :style      (select-keys styles/editor-text [:width :height])} ""]
-             [:div {:style            styles/editor-text
-                    :ref              "text"
-                    :content-editable true
-                    :on-key-down      #(handle-shortcuts :editor %)
-                    :on-key-press     #(send-action! :editor-typing)
-                    ; todo om/update is too slow on fast typing. Maybe diff impl. will be faster.
-                    :on-key-up        (fn [e]
-                                        (let [cursor-pos (.. js/window getSelection -anchorOffset)
-                                              new-text (.. e -target -textContent)]
-                                          ; persist entire text in memory and send diff of change to backend
-                                          #_(om/set-state! owner :text new-text))
-                                        )
-                    }
-              text]]))))
+    (render-state [_ {:keys [current-session]}]
+      (let [{:keys [text start-idx removed?]} (:current-insert current-session)
+            text (str (subs (om/get-state owner :text) 0 start-idx) text)]
+        (html [:div {:on-click   #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
+                     :class-name "editor"
+                     :style      styles/editor-reviewer}
+               (when (:text-grain (data/settings data))
+                 [:div {:class-name "grain"
+                        :style      {:height 200
+                                     :width  500}}])
+               [:div {:class-name "gradient"
+                      :style      (select-keys styles/editor-text [:width :height])} ""]
+               [:div {:style            styles/editor-text
+                      :ref              "text"
+                      :content-editable true
+                      :on-key-down      #(handle-shortcuts :editor %)
+                      :on-key-press     #(send-action! :editor-typing)
+                      ; todo om/update is too slow on fast typing. Maybe diff impl. will be faster.
+                      :on-key-up        (fn [e]
+                                          (let [cursor-pos (.. js/window getSelection -anchorOffset)
+                                                new-text (.. e -target -textContent)]
+                                            ; persist entire text in memory and send diff of change to backend
+                                            #_(om/set-state! owner :text new-text))
+                                          )
+                      }
+                text]])))))

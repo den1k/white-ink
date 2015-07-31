@@ -26,11 +26,9 @@
   (reify
     om/IInitState
     (init-state [_]
-      (let [review-drafts (data/review-drafts data)
-            review-draft (last review-drafts)]
-        {:review-drafts     review-drafts
-         :review-draft      review-draft
-         :render-text       [[:text (:text review-draft)]]
+      (let [draft (data/current-draft data)]
+        {:review-draft      draft
+         :render-text       [[:text (:text draft)]]
          :result-idx        nil
          :scroll-target-idx nil}))
     om/IDidUpdate
@@ -84,9 +82,8 @@
     (display-name [_] "reviewer-view")
     om/IInitState
     (init-state [_]
-      (let [review-drafts (data/review-drafts data)
-            review-draft (last review-drafts)]
-        {:review-draft review-draft}))
+      (let [draft (data/current-draft data)]
+        {:review-draft draft}))
     om/IRenderState
     (render-state [_ {:keys [review-draft]}]
       (html [:div {:style (assoc styles/reviewer-view :opacity speed->opacity)}

@@ -34,18 +34,18 @@
           :on-key-down      #(handle-shortcuts :notepad-editor %)}
          (:text note)]))))
 
-(defn notepad-editor [{:keys [notes] :as draft} owner]
+(defn notepad-editor [{:keys [current-session] :as draft} owner]
   (reify
     om/IInitState
     (init-state [_]
-      :focus-last-note false)
+      {:focus-last-note false})
     om/IWillMount
     (will-mount [_]
       (process-task :notepad-editor
                     :new-note (fn []
-                                (om/transact! draft [:notes] #(conj % {:text        " "
-                                                                       :draft-index (count (:text draft))
-                                                                       :id          (make-squuid)}))
+                                (om/transact! current-session [:notes] #(conj % {:text        " "
+                                                                                 :draft-index (count (:text draft))
+                                                                                 :id          (make-squuid)}))
                                 (om/set-state! owner :focus-last-note true))))
     om/IDidUpdate
     (did-update [_ _ _]
@@ -57,12 +57,13 @@
         (om/set-state! owner :focus-last-note false)))
     om/IRenderState
     (render-state [_ _]
-      (html
-        [:ul {:ref        "notes"
-              :class-name "note-pad"
-              :style      styles/notepad-editor}
-         (for [note notes]
-           (om/build editor-note [note notes]))]))))
+      (let [notes (-> current-session :notes)]
+        (html
+          [:ul {:ref        "notes"
+                :class-name "note-pad"
+                :style      styles/notepad-editor}
+           (for [note notes]
+             (om/build editor-note [note notes]))])))))
 
 (defn notepad-reviewer [{:keys [notes] :as draft} owner]
   (om/component
