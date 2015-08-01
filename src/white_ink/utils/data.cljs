@@ -59,15 +59,28 @@
       ""
       all-inserts)))
 
-(defn cur-insert-text [{:keys [current-session sessions] :as current-draft}]
+(def cur-sessions->text
+  (comp sessions->text cur-sessions))
+
+(defn cur-draft->text [{:keys [current-session sessions] :as current-draft}]
   (let [cur-insert (:current-insert current-session)
         prev-text (->> (sessions->text sessions)
                        (session->text current-session))]
     (-> prev-text
         (subs 0 (:start-idx cur-insert))
         (str (:text cur-insert)))))
-;
+
 ;(def s (deref white-ink.state/app-state))
+
+(defn merge-sort-notes [data]
+  (->> data
+       cur-sessions
+       (map :notes)
+       flatten
+       (sort-by :draft-index)))
+;
+;(cur-sessions->text s)
+;
 ;(-> s
 ;    cur-draft
 ;    cur-insert-text)

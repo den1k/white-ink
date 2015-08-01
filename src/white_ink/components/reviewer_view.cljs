@@ -8,7 +8,8 @@
             [white-ink.components.search :as search]
             [white-ink.utils.dom :as utils.dom]
             [white-ink.utils.misc :as utils.misc])
-  (:require-macros [white-ink.macros :refer [process-task]]))
+  (:require-macros [white-ink.macros :refer [process-task
+                                             send-action!]]))
 
 (defn split-result [results scroll-target-idx]
   (let [[res-idx idx-text idx-char] (utils.misc/containing-idxs-for-text-idx scroll-target-idx results)
@@ -26,9 +27,9 @@
   (reify
     om/IInitState
     (init-state [_]
-      (let [draft (data/current-draft data)]
-        {:review-draft      draft
-         :render-text       [[:text (:text draft)]]
+      (let [draft-text (data/cur-sessions->text data)]
+        {:draft-text        draft-text
+         :render-text       [[:text draft-text]]
          :result-idx        nil
          :scroll-target-idx nil}))
     om/IDidUpdate
@@ -41,7 +42,7 @@
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
-                    :search #(let [text (om/get-state owner [:review-draft :text])
+                    :search #(let [text (om/get-state owner :draft-text)
                                    query (utils.search/constrain-query %)]
                               (when-let [results (utils.search/find text query)]
                                 ;; find first visible result on i-did-update and set idx to it
@@ -70,8 +71,11 @@
         (html
           [:div {:style styles/editor-reviewer}
            [:div
-            {:ref   "review-draft"
-             :style styles/reviewer-text}
+            {:ref      "review-draft"
+             :style    styles/reviewer-text
+             :on-click #(let [click-idx (.. js/window getSelection -anchorOffset)]
+                         (send-action! :start-insert click-idx)
+                         (.preventDefault %))}
             (search/results render-text)]])))))
 
 
@@ -88,4 +92,4 @@
     (render-state [_ {:keys [review-draft]}]
       (html [:div {:style (assoc styles/reviewer-view :opacity speed->opacity)}
              (om/build review-draft-view data)
-             (om/build notepad-reviewer review-draft)]))))
+             (om/build notepad-reviewer (data/merge-sort-notes data))]))))

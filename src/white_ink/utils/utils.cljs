@@ -51,9 +51,7 @@
             total (+ p-count val-length)
             next-idx (inc p-idx)]
         (if (> total stop-idx)
-          (do
-            (prn "total" total)
-            (reduced [next-idx k (- val-length (- total stop-idx))]))
+          (reduced [next-idx k (- val-length (- total stop-idx))])
           [next-idx k total])))
     [-1 0]
     coll))

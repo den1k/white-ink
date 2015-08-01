@@ -5,12 +5,18 @@
             [cljs.core.async :as async]
             [white-ink.styles.styles :as styles]
             [white-ink.utils.data :as data]
-            [white-ink.utils.shortcuts :refer [handle-shortcuts]])
+            [white-ink.utils.shortcuts :refer [handle-shortcuts]]
+            [cljs.pprint :refer [pprint]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [process-task
                                              send-action!]]))
+;; move to utils dom
+(defn cursor->end-and-scroll [node]
+  (doto node
+    utils.dom/scroll-to-bottom
+    utils.dom/set-cursor-to-end))
 
-(defn editor [data owner]
+(defn editor [{:keys [current-draft] :as data} owner]
   (reify
     om/IDisplayName
     (display-name [_] "editor")
@@ -18,16 +24,16 @@
     (will-mount [_]
       (process-task :editor
                     :focus #(utils.dom/set-cursor-to-end (om/get-node owner "text"))))
+    om/IDidUpdate
+    (did-update [_ {:keys [current-draft]} _]
+      (when (not= current-draft (:current-draft data))
+        (cursor->end-and-scroll (om/get-node owner "text"))))
     om/IDidMount
     (did-mount [_]
-      (let [text-node (om/get-node owner "text")]
-        (doto text-node
-          utils.dom/scroll-to-bottom
-          utils.dom/set-cursor-to-end)))
-    om/IRenderState
-    (render-state [_ {:keys [current-session]}]
-      (let [{:keys [text start-idx removed?]} (:current-insert current-session)
-            text (str (subs (om/get-state owner :text) 0 start-idx) text)]
+      (cursor->end-and-scroll (om/get-node owner "text")))
+    om/IRender
+    (render [_]
+      (let [text (data/cur-draft->text current-draft)]
         (html [:div {:on-click   #(utils.dom/set-cursor-to-end (om/get-node owner "text"))
                      :class-name "editor"
                      :style      styles/editor-reviewer}

@@ -17,9 +17,8 @@
                (range 1 (inc n))
                draft-idxs)))))
 
-(def mock-notes (notes-gen 14 draft))
-(def mock-notes-first-session (notes-gen 14 draft "first session"))
-(def mock-notes-second-session (notes-gen 14 draft "second session"))
+(def mock-notes-first-session (notes-gen 5 draft "first session"))
+(def mock-notes-second-session (notes-gen 5 session-2 "second session"))
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:user            {:settings {:text-grain false}
@@ -42,7 +41,7 @@
                                                                                 :removed?  0}]
                                                               :notes          (notes-gen 3 draft "from session")}
                                             :sessions        [{:inserts [{:start-idx 0
-                                                                          :text      draft
+                                                                          :text      (subs draft 0 20)
                                                                           :removed?  0}
                                                                          {:start-idx 2080 ;where insert started in draft
                                                                           :text      "Hi I'm test data, test data, test dada, test dah" ; insert text
@@ -51,20 +50,8 @@
                                                               {:inserts [{:start-idx 5
                                                                           :text      session-2
                                                                           :removed?  0}]
-                                                               :notes   mock-notes-second-session
-                                                               }]}
-                          :drafts          [{:text            draft
-                                             :notes           mock-notes
-                                             :current-session {:current-insert {:start-idx 2080 ;where insert started in draft
-                                                                                :text      "Hi I'm test data, test data, test dada, test dah" ; insert text
-                                                                                :removed?  0} ; number of characters removed - if any
-                                                               :inserts        []
-                                                               :notes          (notes-gen 3 draft "from session")}
-                                             :sessions        [{:inserts [{:start-idx 0
-                                                                           :text      draft
-                                                                           :removed?  0}]
-                                                                :notes   mock-notes
-                                                                }]}
+                                                               :notes   mock-notes-second-session}]}
+                          :drafts          [; this would contain "other" drafts, i.e. entirely different writing projects
                                             ]}))
 
 

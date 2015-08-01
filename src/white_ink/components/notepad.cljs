@@ -3,6 +3,7 @@
             [sablono.core :as html :refer-macros [html]]
             [white-ink.utils.dom :as utils.dom]
             [cljs.core.async :refer [<! sub chan]]
+            [white-ink.utils.data :as data]
             [white-ink.utils.state :refer [make-squuid]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [white-ink.styles.styles :as styles])
@@ -65,7 +66,7 @@
            (for [note notes]
              (om/build editor-note [note notes]))])))))
 
-(defn notepad-reviewer [{:keys [notes] :as draft} owner]
+(defn notepad-reviewer [notes owner]
   (om/component
     (html
       [:ul {:class-name "note-pad"
