@@ -27,6 +27,9 @@
 (def cur-sessions
   (comp sessions cur-draft))
 
+(def cur-insert
+  (comp :current-insert cur-session))
+
 (def cur-inserts
   (comp (partial map :inserts) cur-sessions))
 
@@ -65,7 +68,8 @@
 (defn cur-draft->text [{:keys [current-session sessions] :as current-draft}]
   (let [cur-insert (:current-insert current-session)
         prev-text (->> (sessions->text sessions)
-                       (session->text current-session))]
+                       ;; only showing current insert and not rendering other inserts in session
+                       #_(session->text current-session))]
     (-> prev-text
         (subs 0 (:start-idx cur-insert))
         (str (:text cur-insert)))))

@@ -19,12 +19,12 @@
   (letfn [(top-32-bits [] (.toString (int (/ (.getTime (js/Date.)) 1000)) 16))
           (f [] (.toString (rand-int 16) 16))
           (g [] (.toString (bit-or 0x8 (bit-and 0x3 (rand-int 15))) 16))]
-    (UUID. (string/join (concat
-                                  (top-32-bits) "-"
-                                  (repeatedly 4 f) "-4"
-                                  (repeatedly 3 f) "-"
-                                  (g) (repeatedly 3 f) "-"
-                                  (repeatedly 12 f))))))
+    (uuid (string/join (concat
+                         (top-32-bits) "-"
+                         (repeatedly 4 f) "-4"
+                         (repeatedly 3 f) "-"
+                         (g) (repeatedly 3 f) "-"
+                         (repeatedly 12 f))))))
 
 (defn save-note!
   "Saves a note and it's attributes. If there is no text in the node it will delete it.
@@ -37,3 +37,31 @@
         (om/transact! notes pop)
         #_(prn "nu notes" (clj->js (:notes (last (:drafts @(om/transact! notes pop))))))))
     (om/update! note (merge @note (dissoc note-map :note :notes)))))
+
+(defn index-of-char
+  "Returns idx of char in text. "
+  [char]
+  (fn do-it
+    ([text] (do-it text 0))
+    ([text start]
+     (let [text (subs text start)
+           ret (reduce #(if-not (= char %2)
+                         (inc %)
+                         (reduced %)) 0 text)]
+       (if (= ret (count text))
+         nil
+         (+ start ret))))))
+
+(def index-of-space
+  (index-of-char \space))
+
+(defn save-new-insert! [app-state full-text idx]
+  (let [idx (index-of-space full-text idx)]
+    (prn idx)
+    (om/transact! app-state [:current-draft :current-session]
+                  #(let [{:keys [text] :as current-insert} (:current-insert %)]
+                    (cond-> %
+                            (seq text) (update :inserts conj current-insert)
+                            true (assoc :current-insert {:start-idx idx
+                                                         :text      ""
+                                                         :removed?  nil}))))))

@@ -3,10 +3,10 @@
             [sablono.core :as html :refer-macros [html]]
             [white-ink.utils.dom :as utils.dom]
             [cljs.core.async :refer [<! sub chan]]
-            [white-ink.utils.data :as data]
             [white-ink.utils.state :refer [make-squuid]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
-            [white-ink.styles.styles :as styles])
+            [white-ink.styles.styles :as styles]
+            [white-ink.utils.misc :as utils.misc])
   (:require-macros [white-ink.macros :refer [process-task
                                              send-action!]]))
 
@@ -67,14 +67,24 @@
              (om/build editor-note [note notes]))])))))
 
 (defn notepad-reviewer [notes owner]
-  (om/component
-    (html
-      [:ul {:class-name "note-pad"
-            :style      styles/notepad-reviewer}
-       (for [note notes]
-         [:li {:key        (:id note)
-               :class-name "reviewable note"
-               :style      styles/note-reviewer
-               :on-click   #(do (send-action! :reviewer :scroll-to (:draft-index note))
-                                (.preventDefault %))}
-          (:text note)])])))
+  (reify
+    om/IWillMount
+    (will-mount [_]
+      (process-task :notepad-reviewer
+                    :selection-change #(om/set-state! owner :selection-range %)))
+    om/IRenderState
+    (render-state [_ {:keys [selection-range]}]
+      (html
+        [:ul {:class-name "note-pad"
+              :style      styles/notepad-reviewer}
+         (for [note notes
+               :let [draft-idx (:draft-index note)
+                     in-sel? (utils.misc/in-range? selection-range draft-idx)]]
+           [:li {:key        (:id note)
+                 :class-name "reviewable note"
+                 :style      (if in-sel?
+                               (assoc styles/note-reviewer :color "#323232")
+                               styles/note-reviewer)
+                 :on-click   #(do (send-action! :reviewer :scroll-to draft-idx)
+                                  (.preventDefault %))}
+            (:text note)])]))))

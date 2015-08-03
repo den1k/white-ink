@@ -19,6 +19,11 @@ ul {
     /*padding: 0;*/
 }
 
+::selection {
+    background-color: gainsboro;
+    color: black;
+}
+
 @-webkit-keyframes grain {
     0%, 100% {
         -moz-transform: translate(0, 0);
@@ -129,7 +134,7 @@ ul {
 
 .reviewable.note:hover {
     border-radius: 2px;
-    color: darkslategray !important;
+    color: #323232 !important;
 }
 
 /*.review-draft:before {*/

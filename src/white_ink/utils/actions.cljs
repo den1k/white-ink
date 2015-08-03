@@ -2,7 +2,8 @@
   (:require [om.core :as om]
             [cljs.core.async :refer [>! <! put!]]
             [cljs.core.match :refer-macros [match]]
-            [white-ink.utils.state :refer [save-note!]]
+            [white-ink.utils.state :refer [save-note!
+                                           save-new-insert!]]
             [white-ink.utils.styles.transition :as trans])
   (:require-macros [cljs.core.async.macros :as async]))
 
@@ -18,13 +19,17 @@
                              [[:key-down :editor :arrow-up]] (constantly nil)
                              [[:key-down :editor :arrow-right]] (constantly nil)
                              [[:key-down :editor :arrow-down]] (constantly nil)
-                             ;; todo it persists note, impl refocus editor
+
                              [[:key-down :notepad-editor :return]] (put! tasks [:editor :focus])
                              [[:key-down :notepad-editor :tab]] (put! tasks [:editor :focus])
                              [[:key-down :search :right-bracket]] (put! tasks [:reviewer :search-dir :forward])
                              [[:key-down :search :left-bracket]] (put! tasks [:reviewer :search-dir :backward])
 
-                             [[:editor :focus]] (put! tasks [:editor :focus])
+                             [[:selection-change :reviewer range]] (put! tasks [:notepad-reviewer :selection-change range])
+
+                             [[:editor :focus]] (do
+                                                  (put! tasks [:notepad-reviewer :selection-change [0 0]])
+                                                  (put! tasks [:editor :focus]))
 
                              [[:reviewer :search query]] (put! tasks [:reviewer :search query])
                              [[:reviewer :scroll-to idx]] (put! tasks [:reviewer :scroll-to idx])
@@ -41,17 +46,7 @@
                              [[:editor-typing]] (trans/fade :typing app-state)
                              [[:app-mouse]] (trans/fade :mouse app-state)
 
-                             [[:start-insert idx]] (do
-                                                     (prn "doing")
-                                                     (om/transact! app-state [:current-draft :current-session]
-                                                                   #(let [{:keys [text] :as current-insert} (:current-insert %)
-                                                                          add-insert (if (seq text)
-                                                                                       (update % :inserts conj current-insert)
-                                                                                       %)
-                                                                          insert (assoc add-insert :current-insert {:start-idx idx
-                                                                                                                    :text      ""
-                                                                                                                    :removed?  nil})]
-                                                                     insert)))
+                             [[:start-insert text idx]] (save-new-insert! app-state text idx)
 
                              :else (.warn js/console "Unknown action: " (clj->js action-vec)))) action-vec)
                    (recur))))

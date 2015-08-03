@@ -32,13 +32,6 @@
          :render-text       [[:text draft-text]]
          :result-idx        nil
          :scroll-target-idx nil}))
-    om/IDidUpdate
-    (did-update [_ _ _]
-      (let [parent (om/get-node owner "review-draft")
-            {:keys [result-idx]} (om/get-state owner)]
-        (cond
-          (and searching? (nil? result-idx)) (when-let [vis-idx (utils.dom/first-visible-or-closest-idx parent)]
-                                               (om/set-state! owner :result-idx vis-idx)))))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
@@ -58,10 +51,16 @@
                                     (when next-idx
                                       (om/set-state! owner :result-idx next-idx))))
                     :scroll-to (fn [target-idx]
-                                 (om/set-state! owner :scroll-target-idx target-idx)
-                                 #_(om/update-state! owner :render-text #(split-result % target-idx)))))
+                                 (om/set-state! owner :scroll-target-idx target-idx))))
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (let [parent (om/get-node owner "review-draft")
+            {:keys [result-idx]} (om/get-state owner)]
+        (cond
+          (and searching? (nil? result-idx)) (when-let [vis-idx (utils.dom/first-visible-or-closest-idx parent)]
+                                               (om/set-state! owner :result-idx vis-idx)))))
     om/IRenderState
-    (render-state [_ {:keys [render-text result-idx scroll-target-idx]}]
+    (render-state [_ {:keys [draft-text render-text result-idx scroll-target-idx]}]
       (let [render-text (cond-> render-text
                                 ;; todo find solution for offset idx when length increased due to scroll idx
                                 (and searching? result-idx) (update result-idx conj :selected)
@@ -71,11 +70,23 @@
         (html
           [:div {:style styles/editor-reviewer}
            [:div
-            {:ref      "review-draft"
-             :style    styles/reviewer-text
-             :on-click #(let [click-idx (.. js/window getSelection -anchorOffset)]
-                         (send-action! :start-insert click-idx)
-                         (.preventDefault %))}
+            {:ref           "review-draft"
+             :style         styles/reviewer-text
+             ;:on-click    #(let [click-idx (.. js/window getSelection -anchorOffset)]
+             ;               (send-action! :start-insert click-idx)
+             ;               (.preventDefault %))
+             :on-mouse-down #(do (send-action! :selection-change :reviewer [0 0])
+                                 (utils.dom/set-selection (om/get-node owner "review-draft") 0 0))
+             :on-mouse-move #(let [{:keys [start end]} (utils.dom/get-selection)]
+                              (when (or (= 0 start end) (not= start end))
+                                (send-action! :selection-change :reviewer [start end]))
+                              (.stopPropagation %))
+             :on-mouse-up   #(let [{:keys [start end type]} (utils.dom/get-selection)]
+                              (case type
+                                :caret (send-action! :start-insert draft-text start)
+                                :range (send-action! :selection-change :reviewer [start end]))
+                              (.preventDefault %))
+             }
             (search/results render-text)]])))))
 
 
@@ -84,12 +95,8 @@
   (reify
     om/IDisplayName
     (display-name [_] "reviewer-view")
-    om/IInitState
-    (init-state [_]
-      (let [draft (data/current-draft data)]
-        {:review-draft draft}))
-    om/IRenderState
-    (render-state [_ {:keys [review-draft]}]
+    om/IRender
+    (render [_]
       (html [:div {:style (assoc styles/reviewer-view :opacity speed->opacity)}
              (om/build review-draft-view data)
              (om/build notepad-reviewer (data/merge-sort-notes data))]))))

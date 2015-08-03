@@ -32,17 +32,19 @@
 
 (def ^:const editor-text
   (merge typo/write-1
-         {:overflow "hidden"
-          :outline  "none"
+         {:overflow            "hidden"
+          :outline             "none"
           ; z-index for grain
-          :zIndex   0
-          :height   editor-height}))
+          :zIndex              0
+          :height              editor-height
+          :-webkit-user-select "none"}))
 
 (def ^:const reviewer-text
   (merge typo/write-1
          {:height   reviewer-height
           :overflow "auto"
-          :color    colors/reviewable-text}))
+          :color    colors/reviewable-text
+          :-webkit-user-select "initial"}))
 
 (def ^:const reviewer-view
   (merge texts-and-notepad
@@ -59,7 +61,8 @@
    :paddingRight  9
    :overflowX     "hidden"
    :overflowY     "scroll"
-   :direction     "rtl"})
+   :direction     "rtl"
+   :-webkit-user-select "none"})
 
 (def notepad-editor
   (assoc notepad

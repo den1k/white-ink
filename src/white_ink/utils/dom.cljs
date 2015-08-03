@@ -8,6 +8,13 @@
   ISeqable
   (-seq [array] (array-seq array 0)))
 
+(defn get-selection []
+  (let [sel (.. js/document getSelection)
+        [start end] (sort [(.-baseOffset sel) (.-extentOffset sel)])]
+    {:start start
+     :end   end
+     :type  (keyword (clojure.string/lower-case (.-type sel)))}))
+
 (defn set-selection [node start end]
   (let [range (doto
                 (.createRange js/document)
@@ -68,6 +75,11 @@
 
 (defn scroll-to-bottom [elem]
   (aset elem "scrollTop" 10e6))
+
+(defn cursor->end-and-scroll [node]
+  (doto node
+    scroll-to-bottom
+    set-cursor-to-end))
 
 (defn css-class? [name elem]
   (= name (.-className elem)))
