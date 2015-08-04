@@ -1,6 +1,6 @@
 (ns white-ink.utils.state
   (:require [om.core :as om]
-            [goog.string :as gstring]
+            [white-ink.utils.text :as utils.text]
             [clojure.string :as string]))
 
 (defn make-squuid
@@ -30,38 +30,26 @@
   "Saves a note and it's attributes. If there is no text in the node it will delete it.
   (Currently only deletes last note. TODO delete based on index"
   [{:keys [notes note text] :as note-map}]
-  (if (gstring/isEmptyOrWhitespace text)
+  (if (utils.text/not-empty-or-whitespace text)
+    (om/update! note (merge @note (dissoc note-map :note :notes)))
+    ;; if empty content delete:
     (when notes
       (let [note-idx (last (om/path note))]
         ;; todo impl idx specific removal
         (om/transact! notes pop)
-        #_(prn "nu notes" (clj->js (:notes (last (:drafts @(om/transact! notes pop))))))))
-    (om/update! note (merge @note (dissoc note-map :note :notes)))))
-
-(defn index-of-char
-  "Returns idx of char in text. "
-  [char]
-  (fn do-it
-    ([text] (do-it text 0))
-    ([text start]
-     (let [text (subs text start)
-           ret (reduce #(if-not (= char %2)
-                         (inc %)
-                         (reduced %)) 0 text)]
-       (if (= ret (count text))
-         nil
-         (+ start ret))))))
-
-(def index-of-space
-  (index-of-char \space))
+        #_(prn "nu notes" (clj->js (:notes (last (:drafts @(om/transact! notes pop))))))))))
 
 (defn save-new-insert! [app-state full-text idx]
-  (let [idx (index-of-space full-text idx)]
+  (let [idx (utils.text/index-of-space full-text idx)]
     (prn idx)
     (om/transact! app-state [:current-draft :current-session]
                   #(let [{:keys [text] :as current-insert} (:current-insert %)]
                     (cond-> %
-                            (seq text) (update :inserts conj current-insert)
+                            (utils.text/not-empty-or-whitespace text) (update :inserts conj current-insert)
                             true (assoc :current-insert {:start-idx idx
                                                          :text      ""
                                                          :removed?  nil}))))))
+
+(defn update-cur-insert! [{:keys [start-idx text removed?] :as cur-insert} new-text]
+  ;; `removed?` not yet implemented
+  (om/update! cur-insert :text new-text))

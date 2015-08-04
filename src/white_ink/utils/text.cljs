@@ -32,3 +32,20 @@
 (def trim
   "Trims white spaces to the left and right of a string."
   (comp gstring/trim gstring/collapseBreakingSpaces))
+
+(defn index-of-char
+  "Returns idx of char in text. "
+  [char]
+  (fn do-it
+    ([text] (do-it text 0))
+    ([text start]
+     (let [text (subs text start)
+           ret (reduce #(if-not (= char %2)
+                         (inc %)
+                         (reduced %)) 0 text)]
+       (if (= ret (count text))
+         nil
+         (+ start ret))))))
+
+(def index-of-space
+  (index-of-char \space))

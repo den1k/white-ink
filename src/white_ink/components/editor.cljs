@@ -5,12 +5,28 @@
             [cljs.core.async :as async]
             [white-ink.styles.styles :as styles]
             [white-ink.utils.data :as data]
+            [white-ink.utils.text :as utils.text]
+            [white-ink.utils.async :refer [act-in-silence]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [cljs.pprint :refer [pprint]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [process-task
                                              send-action!]]))
 
+;; can go into component specific namespace
+(defn persist-typed-text
+  "Rerenders on text-specific state-change drop chars on fast typing.
+  This waits for a half second break before persisting.
+  Beware, if current-insert changes before the wait period expired, this will overwrite state."
+  [owner current-draft]
+  (let [persist-chan (om/get-state owner :text-persist-chan)
+        cur-insert (-> current-draft :current-session :current-insert)
+        persist-fn (fn [txt]
+                     (when (utils.text/not-empty-or-whitespace txt)
+                       (send-action! :update-cur-insert cur-insert txt)))]
+    ((act-in-silence 500)
+      persist-chan
+      persist-fn)))
 
 (defn editor [{:keys [current-draft] :as data} owner]
   (reify
@@ -21,15 +37,7 @@
       {:text-persist-chan (async/chan (async/sliding-buffer 1))})
     om/IWillMount
     (will-mount [_]
-      (let [persist-chan (om/get-state owner :text-persist-chan)
-            cur-insert (-> current-draft :current-session :current-insert)]
-        (async/go-loop [persist (async/timeout 5000)]
-                       (async/<! persist)
-                       (when-let [v (async/<! persist-chan)]
-                         (om/update! cur-insert :text v)
-                         (prn "recurring")
-                         (recur (async/timeout 5000)))
-                       ))
+      (persist-typed-text owner current-draft)
       (process-task :editor
                     :focus #(utils.dom/set-cursor-to-end (om/get-node owner "text"))))
     om/IDidUpdate
@@ -60,14 +68,8 @@
                       :on-key-down      #(handle-shortcuts :editor %)
                       :on-key-press     #(do (send-action! :editor-typing)
                                              (.stopPropagation %))
-                      ; todo om/update is too slow on fast typing. Maybe diff impl. will be faster.
                       :on-key-up        (fn [e]
                                           (let [new-text (.. e -target -textContent)]
-                                            ;; still laggy persistence, and drops part of string during rerender
-                                            (async/put! text-persist-chan (subs new-text start-idx))
-                                            ;(om/update! cur-insert :text (subs new-text start-idx))
-                                            ; persist entire text in memory and send diff of change to backend
-                                            #_(om/set-state! owner :text new-text))
-                                          )
+                                            (async/put! text-persist-chan (subs new-text start-idx))))
                       }
                 text]])))))

@@ -3,7 +3,8 @@
             [cljs.core.async :refer [>! <! put!]]
             [cljs.core.match :refer-macros [match]]
             [white-ink.utils.state :refer [save-note!
-                                           save-new-insert!]]
+                                           save-new-insert!
+                                           update-cur-insert!]]
             [white-ink.utils.styles.transition :as trans])
   (:require-macros [cljs.core.async.macros :as async]))
 
@@ -47,6 +48,8 @@
                              [[:app-mouse]] (trans/fade :mouse app-state)
 
                              [[:start-insert text idx]] (save-new-insert! app-state text idx)
+
+                             [[:update-cur-insert insert new-text]] (update-cur-insert! insert new-text)
 
                              :else (.warn js/console "Unknown action: " (clj->js action-vec)))) action-vec)
                    (recur))))
