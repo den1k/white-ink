@@ -52,10 +52,14 @@
                                       (om/set-state! owner :result-idx next-idx))))
                     :scroll-to (fn [target-idx]
                                  (om/set-state! owner :scroll-target-idx target-idx))))
+    om/IDidMount
+    (did-mount [_]
+      (let [node (om/get-node owner "review-draft")]
+        (utils.dom/animate-scroll node (:review-scroll-top data) 2000)))
     om/IDidUpdate
     (did-update [_ _ _]
       (let [parent (om/get-node owner "review-draft")
-            {:keys [result-idx]} (om/get-state owner)]
+            result-idx (om/get-state owner :result-idx)]
         (cond
           (and searching? (nil? result-idx)) (when-let [vis-idx (utils.dom/first-visible-or-closest-idx parent)]
                                                (om/set-state! owner :result-idx vis-idx)))))
@@ -72,9 +76,9 @@
            [:div
             {:ref           "review-draft"
              :style         styles/reviewer-text
-             ;:on-click    #(let [click-idx (.. js/window getSelection -anchorOffset)]
-             ;               (send-action! :start-insert click-idx)
-             ;               (.preventDefault %))
+             :on-wheel      (fn [e]
+                              (send-action! :scroll-offset :reviewer (.-target e))
+                              (.stopPropagation e))
              :on-mouse-down #(do (send-action! :selection-change :reviewer [0 0])
                                  (utils.dom/set-selection (om/get-node owner "review-draft") 0 0))
              :on-mouse-move #(let [{:keys [start end]} (utils.dom/get-selection)]

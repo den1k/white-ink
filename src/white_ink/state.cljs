@@ -26,6 +26,7 @@
                                         :metrics  {:avg-typing-speed 200}}
                       :searching?      false
                       :text-fade-delay 45000
+                      :review-scroll-top 2000
                       :speed->opacity  1
                       :current-draft   {:current-session {:current-insert {:start-idx 3080 ;where insert started in draft
                                                                            :text      "Hi I'm test data, test data, test dada, test dah" ; insert text

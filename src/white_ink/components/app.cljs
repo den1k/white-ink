@@ -16,8 +16,7 @@
   (reify
     om/IWillMount
     (will-mount [_]
-      (do
-        (start-actions-handler (om/get-shared owner) data)))
+      (start-actions-handler (om/get-shared owner) data))
     om/IRender
     (render [_]
       (html [:div

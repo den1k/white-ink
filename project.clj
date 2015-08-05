@@ -7,12 +7,12 @@
             :dependencies [[org.clojure/clojure "1.7.0"]
                            [org.clojure/clojurescript "1.7.28"]
                            [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                           [sablono "0.3.4"]
-                           [org.omcljs/om "0.8.8"]
+                           [sablono "0.3.5"]
+                           [org.omcljs/om "0.9.0"]
                            [prismatic/dommy "1.1.0"]
                            [org.clojure/core.match "0.3.0-alpha4"]]
 
-            :plugins [[lein-cljsbuild "1.0.5"]
+            :plugins [[lein-cljsbuild "1.0.6"]
                       [lein-figwheel "0.3.7"]]
 
             :source-paths ["src"]

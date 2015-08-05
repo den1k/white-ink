@@ -43,6 +43,14 @@
          parent-rect (.. parent getBoundingClientRect)]
      (< (dec (.-top parent-rect)) elem-top (.-bottom parent-rect)))))
 
+(defn animate-scroll [node offset dur]
+  (.play
+    (gdom/Scroll. node
+                  #js [0 0]
+                  #js [0 offset]
+                  dur
+                  (ease :cubic-in-out))))
+
 (defn scroll-into-view
   "Scrolls an element into the visible bounds of it's parent.
   View divider will scroll it into view even if it is already visible, a value of 5
