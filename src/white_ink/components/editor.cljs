@@ -34,7 +34,9 @@
             cur-insert (-> current-draft :current-session :current-insert)
             start-idx (-> current-draft :current-session :current-insert :start-idx)]
         (prn cur-insert)
-        (html [:div {:on-click   #(send-action! :editor :focus)
+        (html [:div {:on-click   (fn [e]
+                                   (send-action! :editor :focus)
+                                   (.preventDefault e))
                      :class-name "editor"
                      :style      styles/editor-reviewer}
                (when (:text-grain (data/settings data))

@@ -2,12 +2,13 @@
   (:require [om.core :as om]
             [sablono.core :as html :refer-macros [html]]
             [white-ink.utils.dom :as utils.dom]
-            [cljs.core.async :refer [<! sub chan]]
+            [cljs.core.async :refer [<! sub chan tap mult put!]]
             [white-ink.utils.state :refer [make-squuid]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [white-ink.styles.styles :as styles]
             [white-ink.utils.misc :as utils.misc])
-  (:require-macros [white-ink.macros :refer [process-task
+  (:require-macros [cljs.core.async.macros :refer [go-loop]]
+                   [white-ink.macros :refer [process-task
                                              send-action!]]))
 
 (defn editor-note [[note notes] owner]
@@ -66,25 +67,50 @@
            (for [note notes]
              (om/build editor-note [note notes]))])))))
 
+(defn reviewer-note [note owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:visible? false})
+    om/IWillMount
+    (will-mount [_]
+      (let [check-viz-chan (om/get-state owner :check-viz-chan)]
+        (go-loop []
+                 (when (<! check-viz-chan)
+                   (om/set-state! owner :visible?
+                                  (utils.dom/visible?
+                                    (.getElementById js/document (utils.misc/note-draft-idx-hook-id note))))
+                   (recur)))))
+    om/IRenderState
+    (render-state [_ {:keys [visible?]}]
+      (html
+        [:li {:key        (:id note)
+              :class-name "reviewable note"
+              :style      (if visible?
+                            (assoc styles/note-reviewer :color "#323232")
+                            styles/note-reviewer)
+              :on-click   #(do (send-action! :reviewer :scroll-to note)
+                               (.preventDefault %))}
+         (:text note)]))))
+
 (defn notepad-reviewer [notes owner]
   (reify
+    om/IInitState
+    (init-state [_]
+      (let [check-all-viz-chan (chan)]
+        {:check-all-viz-chan check-all-viz-chan
+         :mult-viz (mult check-all-viz-chan)}))
     om/IWillMount
     (will-mount [_]
       (process-task :notepad-reviewer
+                    :check-notes-viz #(put! (om/get-state owner :check-all-viz-chan) true)
                     :selection-change #(om/set-state! owner :selection-range %)))
     om/IRenderState
-    (render-state [_ {:keys [selection-range]}]
+    (render-state [_ {:keys [mult-viz]}]
       (html
         [:ul {:class-name "note-pad"
               :style      styles/notepad-reviewer}
          (for [note notes
-               :let [draft-idx (:draft-index note)
-                     in-sel? (utils.misc/in-range? selection-range draft-idx)]]
-           [:li {:key        (:id note)
-                 :class-name "reviewable note"
-                 :style      (if in-sel?
-                               (assoc styles/note-reviewer :color "#323232")
-                               styles/note-reviewer)
-                 :on-click   #(do (send-action! :reviewer :scroll-to draft-idx)
-                                  (.preventDefault %))}
-            (:text note)])]))))
+               :let [check-viz (chan)]]
+           (do (tap mult-viz check-viz)
+               (om/build reviewer-note note {:init-state {:check-viz-chan check-viz}})))]))))

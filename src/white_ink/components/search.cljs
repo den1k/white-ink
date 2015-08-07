@@ -51,13 +51,18 @@
     (render [_]
       (html [:span#scroll-target ""]))))
 
+;; this is a render fn
 (defn results [results]
   (for [[idx res] (map-indexed vector results)
-        :let [[type text selected?] res]]
+        :let [[type content opt] res]]
     (case type
-      :res (om/build result [text selected?] {:react-key idx})
+      :res (om/build result [content opt] {:react-key idx})
       :text (om/build (fn [_ owner]
                         (om/component
                           (html [:span
-                                 text]))) nil {:react-key idx})
-      :scroll-target (om/build scroll-target text {:react-key idx}))))
+                                 content]))) nil {:react-key idx})
+      :note-draft-idx-hook (om/build (fn [_ owner]
+                                  (om/component
+                                    (html [:span {:id opt
+                                                  :style {:background "tomato"}}
+                                           opt]))) nil))))

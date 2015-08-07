@@ -7,51 +7,43 @@
             [white-ink.utils.search :as utils.search]
             [white-ink.components.search :as search]
             [white-ink.utils.dom :as utils.dom]
-            [white-ink.utils.misc :as utils.misc])
+            [white-ink.utils.misc :as utils.misc]
+            [white-ink.utils.components.reviewer-view :refer [insert-note-hooks]])
   (:require-macros [white-ink.macros :refer [process-task
                                              send-action!]]))
-
-(defn split-result [results scroll-target-idx]
-  (let [[res-idx idx-text idx-char] (utils.misc/containing-idxs-for-text-idx scroll-target-idx results)
-        res (get results res-idx)
-        res-text (get res idx-text)
-        [text-1 text-2] ((juxt #(subs % 0 idx-char) #(subs % idx-char)) res-text)]
-    ;; todo cases where item selected (can't have two selected)
-    (vec (concat (subvec results 0 res-idx)
-                 [(assoc res idx-text text-1)
-                  [:scroll-target scroll-target-idx]
-                  (assoc res idx-text text-2)]
-                 (subvec results (inc res-idx))))))
 
 (defn review-draft-view [{:keys [searching?] :as data} owner]
   (reify
     om/IInitState
     (init-state [_]
-      (let [draft-text (data/cur-sessions->text data)]
-        {:draft-text        draft-text
-         :render-text       [[:text draft-text]]
-         :result-idx        nil
-         :scroll-target-idx nil}))
+      (let [draft-text (data/cur-sessions->text data)
+            notes (data/merge-sort-notes data)]
+        {:draft-text  draft-text
+         :render-text (insert-note-hooks [[:text draft-text]] notes)
+         :result-idx  nil
+         :notes       notes}))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
                     :search #(let [text (om/get-state owner :draft-text)
                                    query (utils.search/constrain-query %)]
                               (when-let [results (utils.search/find text query)]
-                                ;; find first visible result on i-did-update and set idx to it
                                 (om/update-state! owner
                                                   (fn [state] (-> state
-                                                                  ;; reset a bunch of state
+                                                                  ;; new results, reset result idx
                                                                   (assoc :result-idx nil)
-                                                                  (assoc :scroll-target-idx nil)
-                                                                  (assoc :render-text results))))))
+                                                                  ;; insert notes after results
+                                                                  ;; since the number of results will in most cases
+                                                                  ;; exceed the number of notes.
+                                                                  (assoc :render-text (insert-note-hooks results (om/get-state owner :notes))))))))
                     :search-dir (fn [dir]
                                   (let [{:keys [render-text result-idx]} (om/get-state owner)
                                         next-idx (and result-idx (utils.search/next-res-idx dir result-idx render-text))]
                                     (when next-idx
                                       (om/set-state! owner :result-idx next-idx))))
-                    :scroll-to (fn [target-idx]
-                                 (om/set-state! owner :scroll-target-idx target-idx))))
+                    :scroll-to (fn [note]
+                                 (let [target (utils.misc/note-draft-idx-hook-id note)]
+                                   (utils.dom/scroll-into-view (.getElementById js/document target) 7 500)))))
     om/IDidMount
     (did-mount [_]
       (let [node (om/get-node owner "review-draft")]
@@ -64,24 +56,27 @@
           (and searching? (nil? result-idx)) (when-let [vis-idx (utils.dom/first-visible-or-closest-idx parent)]
                                                (om/set-state! owner :result-idx vis-idx)))))
     om/IRenderState
-    (render-state [_ {:keys [draft-text render-text result-idx scroll-target-idx]}]
+    (render-state [_ {:keys [draft-text render-text result-idx scroll-target-idx notes]}]
       (let [render-text (cond-> render-text
-                                ;; todo find solution for offset idx when length increased due to scroll idx
+                                ;; order of these matters because the result idx is determined after initial render
+                                ;true (insert-notes notes)
                                 (and searching? result-idx) (update result-idx conj :selected)
-
-                                scroll-target-idx (split-result scroll-target-idx)
                                 )]
         (html
           [:div {:style styles/editor-reviewer}
            [:div
             {:ref           "review-draft"
              :style         styles/reviewer-text
+             ;; potential perf bottleneck, especially during scrolling b/c no selection event in html
              :on-wheel      (fn [e]
-                              (send-action! :scroll-offset :reviewer (.-target e))
+                              (send-action! :scrolling :reviewer)
+                              #_(let [{:keys [start end]} (utils.dom/get-selection)]
+                                (when (or (= 0 start end) (not= start end))
+                                  (send-action! :selection-change :reviewer [start end])))
                               (.stopPropagation e))
              :on-mouse-down #(do (send-action! :selection-change :reviewer [0 0])
                                  (utils.dom/set-selection (om/get-node owner "review-draft") 0 0))
-             :on-mouse-move #(let [{:keys [start end]} (utils.dom/get-selection)]
+             :on-mouse-over #(let [{:keys [start end]} (utils.dom/get-selection)]
                               (when (or (= 0 start end) (not= start end))
                                 (send-action! :selection-change :reviewer [start end]))
                               (.stopPropagation %))

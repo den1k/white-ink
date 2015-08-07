@@ -42,7 +42,7 @@
 (defn idx-of-container-and-containing-item
   "Given a coll of colls, sums the length of each item with key of k
   until stop-idx.
-  Returns the path as [idx-of-containing, k, idx-of-val],
+  Returns the path as [idx-in-containing, k, idx-of-val],
   forming the equivalent of stop-idx in a coll of colls."
   [k stop-idx coll]
   (reduce
