@@ -10,7 +10,8 @@
                            [sablono "0.3.5"]
                            [org.omcljs/om "0.9.0"]
                            [prismatic/dommy "1.1.0"]
-                           [org.clojure/core.match "0.3.0-alpha4"]]
+                           [org.clojure/core.match "0.3.0-alpha4"]
+                           [bardo "0.1.2-SNAPSHOT"]]
 
             :plugins [[lein-cljsbuild "1.0.6"]
                       [lein-figwheel "0.3.7"]]
@@ -31,8 +32,7 @@
                                                  :output-dir           "resources/public/js/compiled/out"
                                                  :optimizations        :none
                                                  :source-map           true
-                                                 :source-map-timestamp true
-                                                 :cache-analysis       true}}
+                                                 }}
                                  {:id           "min"
                                   :source-paths ["src"]
                                   :compiler     {:output-to     "resources/public/js/compiled/white_ink.js"

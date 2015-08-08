@@ -2,7 +2,7 @@
   (:require [goog.style :as gstyle]
             [goog.fx.dom :as gdom]
             [white-ink.utils.utils :refer [count-until-pred]]
-            [white-ink.utils.styles.ease :refer [ease]]))
+            [bardo.ease :refer [ease]]))
 
 (extend-type js/HTMLCollection
   ISeqable

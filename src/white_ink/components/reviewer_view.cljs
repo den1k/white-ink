@@ -1,5 +1,6 @@
 (ns white-ink.components.reviewer-view
   (:require [om.core :as om]
+            [cljs.core.async :refer [put!]]
             [sablono.core :as html :refer-macros [html]]
             [white-ink.utils.data :as data]
             [white-ink.styles.styles :as styles]
@@ -7,6 +8,8 @@
             [white-ink.utils.search :as utils.search]
             [white-ink.components.search :as search]
             [white-ink.utils.dom :as utils.dom]
+            [white-ink.utils.async :refer [throttle-chan
+                                           debounce-chan]]
             [white-ink.utils.misc :as utils.misc]
             [white-ink.utils.components.reviewer-view :refer [insert-note-hooks]])
   (:require-macros [white-ink.macros :refer [process-task
@@ -17,11 +20,14 @@
     om/IInitState
     (init-state [_]
       (let [draft-text (data/cur-sessions->text data)
-            notes (data/merge-sort-notes data)]
+            notes (data/merge-sort-notes data)
+            actions-chan (om/get-shared owner :actions)]
         {:draft-text  draft-text
          :render-text (insert-note-hooks [[:text draft-text]] notes)
          :result-idx  nil
-         :notes       notes}))
+         :notes       notes
+         :throttle-action (throttle-chan 200 actions-chan)
+         :debounce-action (debounce-chan 2000 actions-chan)}))
     om/IWillMount
     (will-mount [_]
       (process-task :reviewer
@@ -56,10 +62,8 @@
           (and searching? (nil? result-idx)) (when-let [vis-idx (utils.dom/first-visible-or-closest-idx parent)]
                                                (om/set-state! owner :result-idx vis-idx)))))
     om/IRenderState
-    (render-state [_ {:keys [draft-text render-text result-idx scroll-target-idx notes]}]
+    (render-state [_ {:keys [draft-text render-text result-idx throttle-action debounce-action]}]
       (let [render-text (cond-> render-text
-                                ;; order of these matters because the result idx is determined after initial render
-                                ;true (insert-notes notes)
                                 (and searching? result-idx) (update result-idx conj :selected)
                                 )]
         (html
@@ -69,10 +73,8 @@
              :style         styles/reviewer-text
              ;; potential perf bottleneck, especially during scrolling b/c no selection event in html
              :on-wheel      (fn [e]
-                              (send-action! :scrolling :reviewer)
-                              #_(let [{:keys [start end]} (utils.dom/get-selection)]
-                                (when (or (= 0 start end) (not= start end))
-                                  (send-action! :selection-change :reviewer [start end])))
+                              (put! throttle-action [:scrolling :reviewer])
+                              (put! debounce-action [:persist-scroll-offset :reviewer (om/get-node owner "review-draft")])
                               (.stopPropagation e))
              :on-mouse-down #(do (send-action! :selection-change :reviewer [0 0])
                                  (utils.dom/set-selection (om/get-node owner "review-draft") 0 0))

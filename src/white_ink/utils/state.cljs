@@ -1,9 +1,8 @@
 (ns white-ink.utils.state
   (:require [om.core :as om]
             [white-ink.utils.text :as utils.text]
-            [white-ink.utils.async :refer [act-in-silence]]
             [clojure.string :as string]
-            [cljs.core.async :as async]))
+            ))
 
 (defn make-squuid
   "(make-squuid)  =>  new-uuid
@@ -60,16 +59,16 @@
   "Rerenders on text-specific state-change drop chars on fast typing.
   This waits for a half second break before persisting.
   Beware, if current-insert changes before the wait period expired, this will overwrite state."
-  [{:keys [current-draft] :as app-state}]
+  [{:keys [current-draft] :as app-state} new-text]
   (let [cur-insert (-> current-draft :current-session :current-insert)
         persist-fn (fn [txt]
                      (when (utils.text/not-empty-or-whitespace txt)
                        (update-cur-insert! cur-insert txt)))]
-    (act-in-silence 500 persist-fn)))
+    (persist-fn new-text)))
 
-(defn persist-scroll-offset-chan [data]
+(defn persist-scroll-offset [data el]
   (let [persist-fn (fn [el]
                      ;; no-op if nil. Could maybe checked earlier?
                      (when el
                        (om/update! data :review-scroll-top (.-scrollTop el))))]
-    (act-in-silence 2000 persist-fn)))
+    (persist-fn el)))

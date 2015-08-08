@@ -1,9 +1,6 @@
 (ns white-ink.components.app
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros [html]]
-            [white-ink.state :refer [app-state]]
-            [cljs.core.async :as async]
             [white-ink.components.editor-view :refer [editor-view]]
             [white-ink.components.reviewer-view :refer [reviewer-view]]
             [white-ink.utils.actions :refer [start-actions-handler]]

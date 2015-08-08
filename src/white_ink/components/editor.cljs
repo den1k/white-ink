@@ -5,8 +5,7 @@
             [cljs.core.async :as async]
             [white-ink.styles.styles :as styles]
             [white-ink.utils.data :as data]
-            [white-ink.utils.text :as utils.text]
-            [white-ink.utils.async :refer [act-in-silence]]
+            [white-ink.utils.async :refer [debounce-chan]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [cljs.pprint :refer [pprint]])
   (:require-macros [cljs.core.async.macros :as async]
@@ -17,6 +16,9 @@
   (reify
     om/IDisplayName
     (display-name [_] "editor")
+    om/IInitState
+    (init-state [_]
+      {:debounce-action (debounce-chan 500 (om/get-shared owner :actions))})
     om/IWillMount
     (will-mount [_]
       (process-task :editor
@@ -28,8 +30,8 @@
     om/IDidMount
     (did-mount [_]
       (utils.dom/cursor->end-and-scroll (om/get-node owner "text")))
-    om/IRender
-    (render [_]
+    om/IRenderState
+    (render-state [_ {:keys [debounce-action]}]
       (let [text (data/cur-draft->text current-draft)
             cur-insert (-> current-draft :current-session :current-insert)
             start-idx (-> current-draft :current-session :current-insert :start-idx)]
@@ -53,7 +55,7 @@
                                              (.stopPropagation %))
                       :on-key-up        (fn [e]
                                           (let [new-text (.. e -target -textContent)]
-                                            (send-action! :persist-insert-text (subs new-text start-idx)))
+                                            (async/put! debounce-action [:persist-insert-text (subs new-text start-idx)]))
                                           (.preventDefault e))
                       }
                 text]])))))
