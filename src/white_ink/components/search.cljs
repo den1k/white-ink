@@ -64,5 +64,4 @@
       :note-draft-idx-hook (om/build (fn [_ owner]
                                   (om/component
                                     (html [:span {:id opt
-                                                  :style {:background "tomato"}}
-                                           opt]))) nil))))
+                                                  :style {:background "tomato"}}]))) nil))))

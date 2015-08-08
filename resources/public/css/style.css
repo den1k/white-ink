@@ -108,6 +108,8 @@ ul {
 .editor > .grain:after {
     animation: grain 1s steps(3) infinite;
     background: url(https://www.dropbox.com/s/hpthnpl0fl0nb61/vintage-speckles-trans.png?dl=1);
+    /*would need to adjust effects for more dense grain pattern*/
+    /*background: url(https://www.dropbox.com/s/m25riuumgl8och2/markus-grain-copy.png?dl=1);*/
     /*background: orange;*/
     background-size: 8%;
     opacity: 0.8;

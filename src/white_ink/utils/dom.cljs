@@ -8,12 +8,24 @@
   ISeqable
   (-seq [array] (array-seq array 0)))
 
-(defn get-selection []
-  (let [sel (.. js/document getSelection)
-        [start end] (sort [(.-baseOffset sel) (.-extentOffset sel)])]
-    {:start start
-     :end   end
-     :type  (keyword (clojure.string/lower-case (.-type sel)))}))
+(defn get-selection
+  "Returns index of caret in text. If include-parent is true,
+  will also count all siblings until the node containing the caret."
+  ([] (get-selection false))
+  ([include-parent?]
+    (let [sel (.. js/document getSelection)
+          [start end] (sort [(.-baseOffset sel) (.-extentOffset sel)])]
+      (if-not include-parent?
+        {:start start
+         :end   end
+         :type  (keyword (clojure.string/lower-case (.-type sel)))}
+        (let [sel-node (.. sel -anchorNode -parentElement)
+              siblings (.. sel-node -parentNode -children)
+              sibl-pre-node (take-while #(not= sel-node %) siblings)
+              txt-count-until (reduce (fn [n node] (+ n (.. node -textContent -length))) 0 sibl-pre-node)]
+          {:start (+ txt-count-until start)
+           :end   (+ txt-count-until end)
+           :type  (keyword (clojure.string/lower-case (.-type sel)))})))))
 
 (defn set-selection [node start end]
   (let [range (doto

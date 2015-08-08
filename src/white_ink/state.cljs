@@ -31,6 +31,7 @@
                       :current-draft   {:current-session {:current-insert {:start-idx 3080 ;where insert started in draft
                                                                            :text      "Hi I'm test data, test data, test dada, test dah" ; insert text
                                                                            :removed?  0} ; number of characters removed - if any
+                                                          ;; inserts are not visible until the end of the session, when it is added to `sessions`
                                                           :inserts        [{:start-idx 0 ;where insert started in draft
                                                                             :text      "First instert in current-session" ; insert text
                                                                             :removed?  0}

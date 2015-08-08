@@ -76,13 +76,13 @@
                               (put! throttle-action [:scrolling :reviewer])
                               (put! debounce-action [:persist-scroll-offset :reviewer (om/get-node owner "review-draft")])
                               (.stopPropagation e))
-             :on-mouse-down #(do (send-action! :selection-change :reviewer [0 0])
-                                 (utils.dom/set-selection (om/get-node owner "review-draft") 0 0))
-             :on-mouse-over #(let [{:keys [start end]} (utils.dom/get-selection)]
-                              (when (or (= 0 start end) (not= start end))
-                                (send-action! :selection-change :reviewer [start end]))
-                              (.stopPropagation %))
-             :on-mouse-up   #(let [{:keys [start end type]} (utils.dom/get-selection)]
+             ;:on-mouse-down #(do (send-action! :selection-change :reviewer [0 0])
+             ;                    (utils.dom/set-selection (om/get-node owner "review-draft") 0 0))
+             ;:on-mouse-over #(let [{:keys [start end]} (utils.dom/get-selection)]
+             ;                 (when (or (= 0 start end) (not= start end))
+             ;                   (send-action! :selection-change :reviewer [start end]))
+             ;                 (.stopPropagation %))
+             :on-mouse-up   #(let [{:keys [start end type]} (utils.dom/get-selection true)]
                               (case type
                                 :caret (send-action! :start-insert draft-text start)
                                 :range (send-action! :selection-change :reviewer [start end]))

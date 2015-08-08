@@ -18,7 +18,7 @@
     (display-name [_] "editor")
     om/IInitState
     (init-state [_]
-      {:debounce-action (debounce-chan 500 (om/get-shared owner :actions))})
+      {:debounce-action (debounce-chan 2000 (om/get-shared owner :actions))})
     om/IWillMount
     (will-mount [_]
       (process-task :editor
