@@ -71,10 +71,12 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:visible? false})
+      {:visible? false
+       :mult-viz-chan nil})
     om/IWillMount
     (will-mount [_]
-      (let [check-viz-chan (om/get-state owner :check-viz-chan)]
+      (let [check-viz-chan (chan)]
+        (tap (om/get-state owner :mult-viz-chan) check-viz-chan)
         (go-loop []
                  (when (<! check-viz-chan)
                    (om/set-state! owner :visible?
@@ -99,7 +101,7 @@
     (init-state [_]
       (let [check-all-viz-chan (chan)]
         {:check-all-viz-chan check-all-viz-chan
-         :mult-viz (mult check-all-viz-chan)}))
+         :mult-viz           (mult check-all-viz-chan)}))
     om/IWillMount
     (will-mount [_]
       (process-task :notepad-reviewer
@@ -110,7 +112,5 @@
       (html
         [:ul {:class-name "note-pad"
               :style      styles/notepad-reviewer}
-         (for [note notes
-               :let [check-viz (chan)]]
-           (do (tap mult-viz check-viz)
-               (om/build reviewer-note note {:init-state {:check-viz-chan check-viz}})))]))))
+         (for [note notes]
+           (om/build reviewer-note note {:init-state {:mult-viz-chan mult-viz}}))]))))

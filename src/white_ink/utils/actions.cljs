@@ -41,7 +41,7 @@
                               (put! tasks [:editor :focus]))
 
          [[:reviewer :search query]] (put! tasks [:reviewer :search query])
-         [[:reviewer :scroll-to idx]] (put! tasks [:reviewer :scroll-to idx])
+         [[:reviewer :scroll-to note]] (put! tasks [:reviewer :scroll-to note])
 
          [[:toggle-search]] (toggle-search app-state tasks)
          [[:search-off]] (do (put! tasks [:editor :focus])
