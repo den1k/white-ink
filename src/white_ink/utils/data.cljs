@@ -76,11 +76,19 @@
 
 ;(def s (deref white-ink.state/app-state))
 
+(defn insert-add-offset-to-notes
+  "Notes idxs are relative to the start of their insert.
+  This adds the insert idx to every note idx."
+  [insert]
+  (let [offset (:start-idx insert)
+        nts (:notes insert)]
+    (map #(update % :draft-index + offset) nts)))
+
 (defn merge-sort-notes [data]
   (->> data
        cur-sessions
-       (map :notes)
-       flatten
+       (mapcat :inserts)
+       (into [] (mapcat insert-add-offset-to-notes))
        (sort-by :draft-index)))
 ;
 ;(cur-sessions->text s)

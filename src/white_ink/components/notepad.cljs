@@ -45,9 +45,12 @@
     (will-mount [_]
       (process-task :notepad-editor
                     :new-note (fn []
-                                (om/transact! current-session [:notes] #(conj % {:text        " "
-                                                                                 :draft-index (count (:text draft))
-                                                                                 :id          (make-squuid)}))
+                                ;; todo make save note as it is submitted, and not empty before
+                                (om/transact! current-session
+                                              [:current-insert :notes]
+                                              #(conj % {:text        " "
+                                                        :draft-index (count (:text draft))
+                                                        :id          (make-squuid)}))
                                 (om/set-state! owner :focus-last-note true))))
     om/IDidUpdate
     (did-update [_ _ _]
@@ -59,7 +62,7 @@
         (om/set-state! owner :focus-last-note false)))
     om/IRenderState
     (render-state [_ _]
-      (let [notes (-> current-session :notes)]
+      (let [notes (-> current-session :current-insert :notes)]
         (html
           [:ul {:ref        "notes"
                 :class-name "note-pad"
@@ -71,7 +74,7 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:visible? false
+      {:visible?      false
        :mult-viz-chan nil})
     om/IWillMount
     (will-mount [_]

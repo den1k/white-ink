@@ -20,6 +20,17 @@
 (def mock-notes-first-session (notes-gen 5 draft "first session"))
 (def mock-notes-second-session (notes-gen 5 session-2 "second session"))
 
+(def inserts-text
+  {:current "I'm the current insert, the one and only current insert bro."
+   :first   "First instert in current-session"
+   :second  "second instert in current-session"
+   :third   "third instert in current-session"})
+
+(def ses-ins-text
+  {:first  {:first  "I'm the very first insert of the very first session. The first insert of all inserts. Basically the beginning of all writing."
+            :second "The second and last insert of all inserts in general and in the first session. Pleasure to meet you."}
+   :second {:first "The first inserts in the second session, hi!"}})
+
 ;; define your app data so that it doesn't get over-written on reload
 (def app-state (atom {:user              {:settings {:text-grain false}
                                           ;; metrics would be individual stats about a user calculated over time
@@ -28,30 +39,36 @@
                       :text-fade-delay   45000
                       :review-scroll-top 2000
                       :speed->opacity    1
-                      :current-draft     {:current-session {:current-insert {:start-idx 3080 ;where insert started in draft
-                                                                             :text      "Hi I'm test data, test data, test dada, test dah" ; insert text
-                                                                             :removed?  0} ; number of characters removed - if any
+                      :current-draft     {:current-session {:current-insert {:start-idx 100 ;where insert started in draft
+                                                                             :text      (:current inserts-text) ; insert text
+                                                                             :removed?  0
+                                                                             :notes     (notes-gen 2 (:current inserts-text) "cur ses cur ins")} ; number of characters removed - if any
                                                             ;; inserts are not visible until the end of the session, when it is added to `sessions`
                                                             :inserts        [{:start-idx 0 ;where insert started in draft
-                                                                              :text      "First instert in current-session" ; insert text
-                                                                              :removed?  0}
+                                                                              :text      (:first inserts-text) ; insert text
+                                                                              :removed?  0
+                                                                              :notes     (notes-gen 2 (:first inserts-text) "cur ses 1st ins")}
                                                                              {:start-idx 0 ;where insert started in draft
-                                                                              :text      "second instert in current-session" ; insert text
-                                                                              :removed?  0}
+                                                                              :text      (:second inserts-text) ; insert text
+                                                                              :removed?  0
+                                                                              :notes     (notes-gen 2 (:second inserts-text) "cur ses 2nd ins")}
                                                                              {:start-idx 0 ;where insert started in draft
-                                                                              :text      "third instert in current-session" ; insert text
-                                                                              :removed?  0}]
-                                                            :notes          (notes-gen 3 draft "from session")}
+                                                                              :text      (:third inserts-text) ; insert text
+                                                                              :removed?  0
+                                                                              :notes     (notes-gen 2 (:third inserts-text) "cur ses 3rd ins")}]}
                                           :sessions        [{:inserts [{:start-idx 0
-                                                                        :text      draft
-                                                                        :removed?  0}
-                                                                       {:start-idx 2080 ;where insert started in draft
-                                                                        :text      "Hi I'm test data, test data, test dada, test dah" ; insert text
-                                                                        :removed?  0}]
-                                                             :notes   mock-notes-first-session}
-                                                            {:inserts [{:start-idx 1800
-                                                                        :text      session-2
-                                                                        :removed?  0}]
+                                                                        :text      (-> ses-ins-text :first :first)
+                                                                        :removed?  0
+                                                                        :notes     (notes-gen 2 (-> ses-ins-text :first :first) "first first")}
+                                                                       {:start-idx 20 ;where insert started in draft
+                                                                        :text      (-> ses-ins-text :first :second)
+                                                                        :removed?  0
+                                                                        :notes     (notes-gen 2 (-> ses-ins-text :first :second) "first second")}]
+                                                             }
+                                                            {:inserts [{:start-idx 30
+                                                                        :text      (-> ses-ins-text :second :first)
+                                                                        :removed?  0
+                                                                        :notes     (notes-gen 2 (-> ses-ins-text :second :first) "second first")}]
                                                              ;; draft index needs to be saved as sum of current index in inserts and start-idx of insert
                                                              ;; order is all that matters
                                                              ;; to build either the text or the notes all previous operations need to be applied
@@ -61,7 +78,7 @@
                                                              ;; then to each start-idx the length of the previous insert needs to be added
                                                              ;; todo put notes into each insert (otherwise their order cannot be easily determined)
                                                              ;; todo - in that case draft-idx can be relative to insert start-idx
-                                                             :notes   (map #(update % :draft-index + 1800) mock-notes-second-session)}]}
+                                                             }]}
                       :drafts            [; this would contain "other" drafts, i.e. entirely different writing projects
                                           ]}))
 

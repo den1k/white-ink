@@ -13,3 +13,5 @@ pom.xml
 .nrepl-port
 .idea
 white_ink.iml
+*.log
+firebase.json

@@ -99,8 +99,8 @@ ul {
 
 .editor > .gradient {
     position: absolute;
-    /*not so good:*/
-    width: 100%;
+    /*width of editor:*/
+    width: 550px;
     /*background: blue;*/
     background: linear-gradient(rgba(0, 0, 0, 0), #fff 0%, rgba(255, 255, 255, 0.7) 17%, rgba(255, 255, 255, 0) 100%);
 }
