@@ -49,7 +49,8 @@
                             (utils.text/not-empty-or-whitespace text) (update :inserts conj current-insert)
                             true (assoc :current-insert {:start-idx idx
                                                          :text      ""
-                                                         :removed?  nil}))))))
+                                                         :removed?  nil
+                                                         :notes []}))))))
 
 (defn update-cur-insert! [{:keys [start-idx text removed?] :as cur-insert} new-text]
   ;; `removed?` not yet implemented

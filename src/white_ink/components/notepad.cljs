@@ -49,7 +49,7 @@
                                 (om/transact! current-session
                                               [:current-insert :notes]
                                               #(conj % {:text        " "
-                                                        :draft-index (count (:text draft))
+                                                        :draft-index (count (-> @current-session :current-insert :text))
                                                         :id          (make-squuid)}))
                                 (om/set-state! owner :focus-last-note true))))
     om/IDidUpdate
