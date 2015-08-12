@@ -31,7 +31,7 @@
   (comp :current-insert cur-session))
 
 (def cur-inserts
-  (comp (partial map :inserts) cur-sessions))
+  (comp :inserts cur-session))
 
 (defn inserts->text
   "Concats the text from inserts into one string."
@@ -74,7 +74,6 @@
         (subs 0 (:start-idx cur-insert))
         (str (:text cur-insert)))))
 
-;(def s (deref white-ink.state/app-state))
 
 (defn insert-add-offset-to-notes
   "Notes idxs are relative to the start of their insert.
@@ -84,12 +83,30 @@
         nts (:notes insert)]
     (map #(update % :draft-index + offset) nts)))
 
-(defn merge-sort-notes [data]
+(defn merge-sort-notes-sessions [data]
   (->> data
        cur-sessions
        (mapcat :inserts)
        (into [] (mapcat insert-add-offset-to-notes))
        (sort-by :draft-index)))
+
+(defn merge-notes-cur-session [draft]
+  (->> draft
+       :current-session
+       ((juxt #(map :notes (-> % :inserts)) #(-> % :current-insert :notes)))
+       flatten
+       (remove nil?)))
+
+;(def s (deref white-ink.state/app-state))
+;(-> s
+;    ;cur-insert
+;    cur-inserts
+;    )
+;(merge-notes-cur-session (:current-draft s))
+#_(-> s
+    :current-draft
+    :current-session
+    :inserts)
 ;
 ;(cur-sessions->text s)
 ;

@@ -44,13 +44,14 @@
   (let [idx (utils.text/index-of-space full-text idx)]
     (prn idx)
     (om/transact! app-state [:current-draft :current-session]
-                  #(let [{:keys [text] :as current-insert} (:current-insert %)]
-                    (cond-> %
-                            (utils.text/not-empty-or-whitespace text) (update :inserts conj current-insert)
-                            true (assoc :current-insert {:start-idx idx
-                                                         :text      ""
-                                                         :removed?  nil
-                                                         :notes []}))))))
+                  (fn [cur-session]
+                    (let [{:keys [text] :as current-insert} (:current-insert cur-session)]
+                      (cond-> cur-session
+                              (utils.text/not-empty-or-whitespace text) (update :inserts conj current-insert)
+                              true (assoc :current-insert {:start-idx idx
+                                                           :text      ""
+                                                           :removed?  nil
+                                                           :notes     []})))))))
 
 (defn update-cur-insert! [{:keys [start-idx text removed?] :as cur-insert} new-text]
   ;; `removed?` not yet implemented

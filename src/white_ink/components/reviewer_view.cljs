@@ -20,7 +20,7 @@
     om/IInitState
     (init-state [_]
       (let [draft-text (data/cur-sessions->text data)
-            notes (data/merge-sort-notes data)
+            notes (data/merge-sort-notes-sessions data)
             actions-chan (om/get-shared owner :actions)]
         {:draft-text  draft-text
          :render-text (insert-note-hooks [[:text draft-text]] notes)
@@ -100,4 +100,4 @@
     (render [_]
       (html [:div {:style (assoc styles/reviewer-view :opacity speed->opacity)}
              (om/build review-draft-view data)
-             (om/build notepad-reviewer (data/merge-sort-notes data))]))))
+             (om/build notepad-reviewer (data/merge-sort-notes-sessions data))]))))

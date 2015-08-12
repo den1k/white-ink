@@ -6,6 +6,7 @@
             [white-ink.utils.state :refer [make-squuid]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [white-ink.styles.styles :as styles]
+            [white-ink.utils.data :as data]
             [white-ink.utils.misc :as utils.misc])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]
                    [white-ink.macros :refer [process-task
@@ -62,7 +63,7 @@
         (om/set-state! owner :focus-last-note false)))
     om/IRenderState
     (render-state [_ _]
-      (let [notes (-> current-session :current-insert :notes)]
+      (let [notes (data/merge-notes-cur-session draft)]
         (html
           [:ul {:ref        "notes"
                 :class-name "note-pad"
