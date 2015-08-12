@@ -76,17 +76,20 @@
     om/IInitState
     (init-state [_]
       {:visible?      false
+       :hook-node     nil
        :mult-viz-chan nil})
-    om/IWillMount
-    (will-mount [_]
-      (let [check-viz-chan (chan)]
-        (tap (om/get-state owner :mult-viz-chan) check-viz-chan)
-        (go-loop []
-                 (when (<! check-viz-chan)
-                   (om/set-state! owner :visible?
-                                  (utils.dom/visible?
-                                    (.getElementById js/document (utils.misc/note-draft-idx-hook-id note))))
-                   (recur)))))
+    om/IDidMount
+    (did-mount [_]
+      (let [hook-node (.getElementById js/document (utils.misc/note-draft-idx-hook-id note))]
+        (let [check-viz-chan (chan)]
+          (om/set-state! owner :hook-node hook-node)
+          (tap (om/get-state owner :mult-viz-chan) check-viz-chan)
+          (go-loop []
+                   (when (<! check-viz-chan)
+                     (om/set-state! owner :visible?
+                                    (utils.dom/visible?
+                                      hook-node))
+                     (recur))))))
     om/IRenderState
     (render-state [_ {:keys [visible?]}]
       (html

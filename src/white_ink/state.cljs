@@ -27,8 +27,8 @@
    :third   "third instert in current-session"})
 
 (def ses-ins-text
-  {:first  {:first  "I'm the very first insert of the very first session. The first insert of all inserts. Basically the beginning of all writing."
-            :second "The second and last insert of all inserts in general and in the first session. Pleasure to meet you."}
+  {:first  {:first  "I'm the very first insert of the very first session."
+            :second "The second and last insert of all inserts in general."}
    :second {:first "The first inserts in the second session, hi!"}})
 
 ;; define your app data so that it doesn't get over-written on reload
