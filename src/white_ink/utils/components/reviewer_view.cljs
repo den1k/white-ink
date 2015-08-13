@@ -12,11 +12,11 @@
 
 (defn insert-note-hooks [results notes]
   (let [draft-idxs (map :draft-index notes)
-        note-css (map note-draft-idx-form notes)]
+        note-form (map note-draft-idx-form notes)]
     (reduce (fn [res [css idx]]
               (insert-form res css idx))
             results
-            (partition 2 (interleave note-css draft-idxs)))))
+            (partition 2 (interleave note-form draft-idxs)))))
 
 #_(insert-note-hooks [[:text "12345678"] [:res "rR"] [:text "999999"]] [{:draft-index 2}
                                                                         {:draft-index 4}

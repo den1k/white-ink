@@ -11,9 +11,10 @@
   ([n draft-text] (notes-gen n draft-text ""))
   ([n draft-text infix]
    (let [draft-idxs (sort (repeatedly n #(rand-int (count draft-text))))]
-     (vec (map #(hash-map :id (make-squuid)
-                          :text (str "note " infix " " %)
-                          :draft-index %2)
+     (vec (map (fn [count idx]
+                 (hash-map :id (make-squuid)
+                           :text (str "note-" infix "-idx" #_idx #_count)
+                           :draft-index idx))
                (range 1 (inc n))
                draft-idxs)))))
 
@@ -26,10 +27,15 @@
    :second  "second instert in current-session"
    :third   "third instert in current-session"})
 
+(defn repeat-string [n x]
+  (clojure.string/join (take n (repeat x))))
+
 (def ses-ins-text
-  {:first  {:first  "I'm the very first insert of the very first session."
-            :second "The second and last insert of all inserts in general."}
-   :second {:first "The first inserts in the second session, hi!"}})
+  {:first  {:first (repeat-string 10 "-11-")}
+   :second {:first  (repeat-string 20 "-21-")
+            :second (repeat-string 30 "-22-")}
+   :third  {:first (repeat-string 40 "-31-")}})
+
 
 ;; define your app data so that it doesn't get over-written on reload
 (def app-state (atom {:user              {:settings {:text-grain false}
@@ -56,19 +62,25 @@
                                                                               :text      (:third inserts-text) ; insert text
                                                                               :removed?  0
                                                                               :notes     (notes-gen 2 (:third inserts-text) "cur ses 3rd ins")}]}
+                                          ;; todo if any later insert has a start-idx smaller than the notes draft-idx,
+                                          ;; todo insert, add text length of insert to draft-idx
                                           :sessions        [{:inserts [{:start-idx 0
                                                                         :text      (-> ses-ins-text :first :first)
                                                                         :removed?  0
-                                                                        :notes     (notes-gen 2 (-> ses-ins-text :first :first) "first first")}
-                                                                       {:start-idx 20 ;where insert started in draft
-                                                                        :text      (-> ses-ins-text :first :second)
-                                                                        :removed?  0
-                                                                        :notes     (notes-gen 2 (-> ses-ins-text :first :second) "first second")}]
-                                                             }
-                                                            {:inserts [{:start-idx 30
+                                                                        :notes     (map #(assoc % :draft-index (+ 80 15)) (notes-gen 1 (-> ses-ins-text :first :first) "11"))}]}
+                                                            {:inserts [{:start-idx 10
                                                                         :text      (-> ses-ins-text :second :first)
                                                                         :removed?  0
-                                                                        :notes     (notes-gen 2 (-> ses-ins-text :second :first) "second first")}]
+                                                                        :notes     (map #(update % :draft-index + 40) (notes-gen 1 (-> ses-ins-text :second :first) "21"))}
+                                                                       {:start-idx 20
+                                                                        :text      (-> ses-ins-text :second :second)
+                                                                        :removed?  0
+                                                                        :notes     (map #(update % :draft-index + 80) (notes-gen 1 (-> ses-ins-text :second :second) "22"))}
+                                                                       {:start-idx 15
+                                                                        :text      (-> ses-ins-text :third :first)
+                                                                        :removed?  0
+                                                                        ;; todo per inserts coll sort by start-idx, then add total inserts length of all previous inserts
+                                                                        :notes     (map #(assoc % :draft-index (+ 80 #_120 5)) (notes-gen 1 (-> ses-ins-text :third :first) "31"))}]
                                                              ;; draft index needs to be saved as sum of current index in inserts and start-idx of insert
                                                              ;; order is all that matters
                                                              ;; to build either the text or the notes all previous operations need to be applied

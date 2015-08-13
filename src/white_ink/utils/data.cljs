@@ -43,7 +43,7 @@
             text
             (subs total-text start-idx)))
      init-text
-     inserts)))
+     (reverse (sort-by :start-idx inserts)))))
 
 (defn session->text
   ([session] (session->text session ""))
@@ -97,16 +97,35 @@
        flatten
        (remove nil?)))
 
-;(def s (deref white-ink.state/app-state))
+;; todo for proper note draft-idx offsets, need to recursively apply every session,
+;; figure out the total text length, then apply the next one. Do not concat all inserts as if
+;; they're one session.
+
+(def s (deref white-ink.state/app-state))
 ;(-> s
-;    ;cur-insert
-;    cur-inserts
-;    )
+    ;cur-insert
+    ;cur-inserts
+    ;)
+
+;;todo sort by start-idx, then additoon backwats
+(->> s
+     :current-draft
+     :sessions
+     (map :inserts)
+     ;; get start-idx of every insert partitioned by session
+     (map #(map (juxt :start-idx (comp count :text)) %))
+
+     ;prn
+     #_(map
+       #(reduce
+         (fn [out start-idx]
+           (conj out (+ (last out) start-idx)))
+         [0] %)))
 ;(merge-notes-cur-session (:current-draft s))
 #_(-> s
-    :current-draft
-    :current-session
-    :inserts)
+      :current-draft
+      :current-session
+      :inserts)
 ;
 ;(cur-sessions->text s)
 ;
