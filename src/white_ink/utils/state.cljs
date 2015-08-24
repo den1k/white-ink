@@ -41,8 +41,9 @@
         #_(prn "nu notes" (clj->js (:notes (last (:drafts @(om/transact! notes pop))))))))))
 
 (defn save-new-insert! [app-state full-text idx]
-  (let [idx (utils.text/index-of-space full-text idx)]
-    (prn idx)
+  (let [idx (or (utils.text/index-of-space full-text idx)
+                ;; append if idx is in last word
+                (count full-text))]
     (om/transact! app-state [:current-draft :current-session]
                   (fn [cur-session]
                     (let [{:keys [text] :as current-insert} (:current-insert cur-session)]
@@ -53,20 +54,19 @@
                                                            :removed?  nil
                                                            :notes     []})))))))
 
-(defn update-cur-insert! [{:keys [start-idx text removed?] :as cur-insert} new-text]
-  ;; `removed?` not yet implemented
-  (om/update! cur-insert :text new-text))
-
-(defn persist-typed-text
+(defn update-cur-insert!
   "Rerenders on text-specific state-change drop chars on fast typing.
   This waits for a half second break before persisting.
   Beware, if current-insert changes before the wait period expired, this will overwrite state."
-  [{:keys [current-draft] :as app-state} new-text]
-  (let [cur-insert (-> current-draft :current-session :current-insert)
-        persist-fn (fn [txt]
-                     (when (utils.text/not-empty-or-whitespace txt)
-                       (update-cur-insert! cur-insert txt)))]
-    (persist-fn new-text)))
+  [{:keys [current-draft] :as app-state} {:keys [text-content orig-text start-idx]}]
+  (let [new-text (subs text-content start-idx)
+        ;; removed may have to be dec'd
+        removed? (when (utils.text/empty-or-whitespace? new-text)
+                   (- (count orig-text)
+                      (count text-content)))
+        cur-insert (-> current-draft :current-session :current-insert)]
+    (om/transact! cur-insert #(merge % {:text     new-text
+                                        :removed? removed?}))))
 
 (defn persist-scroll-offset [data el]
   (let [persist-fn (fn [el]

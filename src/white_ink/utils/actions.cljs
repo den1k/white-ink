@@ -55,7 +55,8 @@
          [[:app-mouse]] (trans/fade :mouse app-state)
 
          [[:start-insert text idx]] (save-new-insert! app-state text idx)
-         [[:persist-insert-text new-text]] (persist-typed-text app-state new-text)
+
+         [[:update-insert text-info]] (update-cur-insert! app-state text-info)
 
          :else (.warn js/console "Unknown action: " (clj->js action-vec))
          ))

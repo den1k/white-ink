@@ -28,7 +28,7 @@
 
 ;; for NOTES
 (def note-draft-idx-hook-id
-  (keys->dasherized-str "note-draft-idx-hook" :draft-index :id))
+  (keys->dasherized-str "note-draft-idx-hook" :abs-idx #_:id))
 
 (defn note-draft-idx-form [note]
   [:note-draft-idx-hook ""

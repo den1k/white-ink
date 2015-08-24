@@ -14,7 +14,8 @@
   ([] (get-selection false))
   ([include-parent?]
     (let [sel (.. js/document getSelection)
-          [start end] (sort [(.-baseOffset sel) (.-extentOffset sel)])]
+          sel-range (.getRangeAt sel 0)
+          [start end] [(.-startOffset sel-range) (.-endOffset sel-range)]]
       (if-not include-parent?
         {:start start
          :end   end

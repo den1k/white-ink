@@ -21,8 +21,8 @@
 (defn inserts [draft]
   (-> draft sessions :inserts))
 
-(defn cur-session [draft]
-  (-> draft cur-draft :current-session))
+(defn cur-session [data]
+  (-> data cur-draft :current-session))
 
 (def cur-sessions
   (comp sessions cur-draft))
@@ -43,7 +43,7 @@
             text
             (subs total-text start-idx)))
      init-text
-     (reverse (sort-by :start-idx inserts)))))
+     inserts)))
 
 (defn session->text
   ([session] (session->text session ""))
@@ -55,19 +55,24 @@
   "Takes a coll of sessions and concats the text from
   every session and every index respectively into one string. "
   [sessions]
-  (let [all-inserts (map :inserts sessions)]
+  (let [sessions-inserts (map :inserts sessions)]
     (reduce
       (fn [all-text insert-coll]
         (inserts->text insert-coll all-text))
       ""
-      all-inserts)))
+      sessions-inserts)))
 
 (def cur-sessions->text
   (comp sessions->text cur-sessions))
 
-(defn cur-draft->text [{:keys [current-session sessions] :as current-draft}]
-  (let [cur-insert (:current-insert current-session)
-        prev-text (->> (sessions->text sessions)
+(defn flatten-sessions-into-inserts [sessions]
+  (vec (mapcat (comp reverse (partial sort-by :idx)) sessions)))
+
+(defn ->sessions-inserts [data]
+  ((comp flatten-sessions-into-inserts cur-sessions) data))
+
+(defn editor-text [sessions-inserts cur-insert]
+  (let [prev-text (->> (inserts->text sessions-inserts)
                        ;; only showing current insert and not rendering other inserts in session
                        #_(session->text current-session))]
     (-> prev-text
@@ -83,12 +88,35 @@
         nts (:notes insert)]
     (map #(update % :draft-index + offset) nts)))
 
-(defn merge-sort-notes-sessions [data]
+#_(defn merge-sort-notes-sessions [data]
   (->> data
        cur-sessions
        (mapcat :inserts)
        (into [] (mapcat insert-add-offset-to-notes))
        (sort-by :draft-index)))
+
+(defn get-abs-char-idx [sessions insert-idx rel-char-idx]
+  (let [abs-char-idx (+ (get-in sessions [insert-idx :start-idx])
+                        rel-char-idx)]
+
+    (reduce
+      (fn [cur-abs-idx {:keys [start-idx text]}]
+        (if (<= start-idx cur-abs-idx)
+          (+ cur-abs-idx (count text))
+          cur-abs-idx))
+      abs-char-idx
+      (next (subvec sessions insert-idx)))))
+
+(defn add-abs-idxs-to-notes [sessions-inserts]
+  (for [[i insert] (map-indexed vector sessions-inserts)]
+    (update insert :notes
+            (fn [notes]
+              (map #(assoc % :abs-idx (get-abs-char-idx sessions-inserts i (:rel-idx %))) notes)))))
+
+(defn cat-sort-notes [sessions-inserts]
+  (->> sessions-inserts
+       (mapcat :notes)
+       (sort-by :abs-idx)))
 
 (defn merge-notes-cur-session [draft]
   (->> draft
@@ -100,27 +128,26 @@
 ;; todo for proper note draft-idx offsets, need to recursively apply every session,
 ;; figure out the total text length, then apply the next one. Do not concat all inserts as if
 ;; they're one session.
-
-(def s (deref white-ink.state/app-state))
+;(def s (deref white-ink.state/app-state))
 ;(-> s
-    ;cur-insert
-    ;cur-inserts
-    ;)
+;cur-insert
+;cur-inserts
+;)
 
-;;todo sort by start-idx, then additoon backwats
-(->> s
-     :current-draft
-     :sessions
-     (map :inserts)
-     ;; get start-idx of every insert partitioned by session
-     (map #(map (juxt :start-idx (comp count :text)) %))
+;;todo sort by idx, then additoon backwats
+#_(->> s
+       :current-draft
+       :sessions
+       (map :inserts)
+       ;; get idx of every insert partitioned by session
+       (map #(map (juxt :idx (comp count :text)) %))
 
-     ;prn
-     #_(map
-       #(reduce
-         (fn [out start-idx]
-           (conj out (+ (last out) start-idx)))
-         [0] %)))
+       ;prn
+       #_(map
+           #(reduce
+             (fn [out idx]
+               (conj out (+ (last out) idx)))
+             [0] %)))
 ;(merge-notes-cur-session (:current-draft s))
 #_(-> s
       :current-draft
@@ -157,12 +184,13 @@
 ;     (map inserts->text)
 ;     )
 ;
-;(def is [{:start-idx 0
+;(def is [{:idx 0
 ;          :text      "The beginning"
 ;          :removed   nil}
-;         {:start-idx 5
+;         {:idx 5
 ;          :text      "The middle"
 ;          :removed   nil}
-;         {:start-idx 10
+;         {:idx 10
 ;          :text      "The end"
 ;          :removed   nil}])
+

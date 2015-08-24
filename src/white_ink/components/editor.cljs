@@ -31,11 +31,10 @@
     (did-mount [_]
       (utils.dom/cursor->end-and-scroll (om/get-node owner "text")))
     om/IRenderState
-    (render-state [_ {:keys [debounce-action]}]
-      (let [text (data/cur-draft->text current-draft)
-            cur-insert (-> current-draft :current-session :current-insert)
+    (render-state [_ {:keys [debounce-action sessions-inserts]}]
+      (let [cur-insert (data/cur-insert data)
+            text (data/editor-text sessions-inserts cur-insert)
             start-idx (-> current-draft :current-session :current-insert :start-idx)]
-        (prn cur-insert)
         (html [:div {:on-click   (fn [e]
                                    (send-action! :editor :focus)
                                    (.preventDefault e))
@@ -54,8 +53,11 @@
                       :on-key-press     #(do (send-action! :editor-typing)
                                              (.stopPropagation %))
                       :on-key-up        (fn [e]
-                                          (let [new-text (.. e -target -textContent)]
-                                            (async/put! debounce-action [:persist-insert-text (subs new-text start-idx)]))
+                                          (let [text-content (.. e -target -textContent)
+                                                text-info {:orig-text text
+                                                           :text-content text-content
+                                                           :start-idx start-idx}]
+                                            (async/put! debounce-action [:update-insert text-info]))
                                           (.preventDefault e))
                       }
                 text]])))))

@@ -11,7 +11,7 @@
 ;   (note-draft-idx-hook-id note)])
 
 (defn insert-note-hooks [results notes]
-  (let [draft-idxs (map :draft-index notes)
+  (let [draft-idxs (map :abs-idx notes)
         note-form (map note-draft-idx-form notes)]
     (reduce (fn [res [css idx]]
               (insert-form res css idx))

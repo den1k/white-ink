@@ -58,4 +58,8 @@
                                (om/component
                                  (html [:span
                                         {:id    opt
-                                         :style {:boxShadow "0px -5px 20px 3px #1E24E5"}}]))) nil))))
+                                         :style {           ;:boxShadow  "0px -5px 20px 3px #1E24E5"
+                                                 :background "tomato"
+                                                 :height 20
+                                                 :width 20
+                                                 :display "inline-block"}}]))) nil))))

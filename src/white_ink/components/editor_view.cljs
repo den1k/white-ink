@@ -8,8 +8,9 @@
 
 (defn editor-view [data owner]
   (om/component
-    (let [current-draft (-> data data/cur-draft)]
+    (let [current-draft (-> data data/cur-draft)
+          sessions-inserts (om/get-state owner :sessions-inserts)]
       (html
         [:div {:style (styles/editor-view (:searching? data))}
-         (om/build editor data)
+         (om/build editor data {:state {:sessions-inserts sessions-inserts}})
          (om/build notepad-editor current-draft)]))))
