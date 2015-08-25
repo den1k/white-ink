@@ -6,11 +6,12 @@
             [white-ink.components.search :as search]
             [white-ink.utils.actions :refer [start-actions-handler]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
-            [white-ink.utils.data :as data])
+            [white-ink.utils.data :as data]
+            [white-ink.components.menu :refer [menu-view]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [send-action!]]))
 
-(defn app [{:keys [searching? speed->opacity] :as data} owner]
+(defn app [{:keys [searching? speed->opacity menu] :as data} owner]
   (reify
     om/IWillMount
     (will-mount [_]
@@ -25,6 +26,18 @@
                                  (.preventDefault %))}
                (when searching?
                  (om/build search/input data))
-               (om/build editor-view data {:state {:sessions-inserts sessions-inserts}})
-               (om/build reviewer-view data {:state {:sessions-inserts sessions-inserts}})
+               (when (:show? menu)
+                 (om/build menu-view data))
+
+               [:div {:style (when (:show? menu)
+                               {:-webkit-filter "blur(3px)"
+                                :opacity        0.1
+                                :transition     "all 2s ease-in"
+                                :background     "white"
+                                :position       "absolute"
+                                :height         "100%"
+                                :width          "100%"
+                                })}
+                (om/build editor-view data {:state {:sessions-inserts sessions-inserts}})
+                (om/build reviewer-view data {:state {:sessions-inserts sessions-inserts}})]
                ])))))

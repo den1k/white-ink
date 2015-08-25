@@ -5,7 +5,6 @@
             [white-ink.utils.state :refer [save-note!
                                            save-new-insert!
                                            update-cur-insert!
-                                           persist-typed-text
                                            persist-scroll-offset]]
             [white-ink.utils.styles.transition :as trans]
             )

@@ -65,6 +65,7 @@
                    (- (count orig-text)
                       (count text-content)))
         cur-insert (-> current-draft :current-session :current-insert)]
+    (prn @cur-insert)
     (om/transact! cur-insert #(merge % {:text     new-text
                                         :removed? removed?}))))
 
