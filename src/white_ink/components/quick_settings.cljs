@@ -1,4 +1,4 @@
-(ns white-ink.components.menu
+(ns white-ink.components.quick-settings
   (:require [om.core :as om :include-macros true]
             [sablono.core :as html :refer-macros [html]]
     #_[white-ink.utils.shortcuts :refer [handle-shortcuts]])
@@ -12,14 +12,15 @@
                      :justifyContent "space-between"
                      :marginBottom   5}}
        [:span name] [:span {:style {:border       "1px solid whitesmoke"
+                                    :background   "white"
                                     :borderRadius "5px"
                                     :padding      "5px 10px"}}
                      key]])))
 
-(defn sub-shortcut-wrapper [shortcut]
-  [:div {:style {:marginLeft   50
+(defn sub-shortcut-wrapper [& shortcuts]
+  [:div {:style {:marginLeft   30
                  :marginBottom 10}}
-   shortcut])
+   shortcuts])
 
 (defn choose [items-map chosen]
   (into {} (map (fn [[k _]]
@@ -34,11 +35,12 @@
   {:outline    "none"
    :border     "1px solid whitesmoke"
    :background "initial"
+   ;:fontSize "1.6rem"
    ;:borderRadius 2
    :cursor     "pointer"
    })
 
-(defn submenu-title-button [[name key menu] owner]
+(defn quick-settings-title-button [[name key menu] owner]
   (reify
     om/IRender
     (render [_]
@@ -51,19 +53,18 @@
                              menu-item-style)}
          name]))))
 
-(defn menu-view [{:keys [menu] :as data} owner]
+(defn quick-settings-view [{:keys [quick-settings] :as data} owner]
   (reify
     om/IInitState
     (init-state [_]
       {})
     om/IRenderState
     (render-state [_ {:keys []}]
-      (let [items (:items menu)
+      (let [items (:items quick-settings)
             {:keys [current-document?
                     documents?
                     keyboard-shortcuts?
                     settings?]} items]
-        (prn (type menu))
         (html [:div
                {:style {:position      "absolute"
                         :margin        "auto"
@@ -85,24 +86,24 @@
                ;; also, list of documents renders below search and is filtered throughout
                [:div {:style {:marginBottom 20}}
                 ;[:button {:style menu-item-style} "Merge Session"]
-                (om/build submenu-title-button ["Current Document" :current-document? items])
-                (om/build submenu-title-button ["Documents" :documents? items])
-                (om/build submenu-title-button ["Shortcuts" :keyboard-shortcuts? items])
-                (om/build submenu-title-button ["Settings" :settings? items])
+                (om/build quick-settings-title-button ["Current Document" :current-document? items])
+                (om/build quick-settings-title-button ["Documents" :documents? items])
+                (om/build quick-settings-title-button ["Shortcuts" :keyboard-shortcuts? items])
+                (om/build quick-settings-title-button ["Settings" :settings? items])
                 ]
                (when current-document?
                  [:div
                   "Current Document options would be here."])
                (when keyboard-shortcuts?
-                 [:div {:style {:width    "80%"
-                                :fontSize "1.6rem"}}
+                 [:div {:style {:width "80%"
+                                ;:fontSize "1.6rem"
+                                }}
                   (om/build shortcut ["New Note" "tab"])
                   (sub-shortcut-wrapper
                     (om/build shortcut ["Submit" "return"]))
                   (om/build shortcut ["Search" "\\"])
                   (sub-shortcut-wrapper
-                    (om/build shortcut ["Next Result" "]"]))
-                  (sub-shortcut-wrapper
+                    (om/build shortcut ["Next Result" "]"])
                     (om/build shortcut ["Previous Result" "["]))
                   ])
 

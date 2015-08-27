@@ -25,8 +25,8 @@
                     :focus #(utils.dom/set-cursor-to-end (om/get-node owner "text"))))
     om/IDidUpdate
     (did-update [_ {:keys [current-draft]} _]
-      (when (not= current-draft (:current-draft data))
-        (utils.dom/cursor->end-and-scroll (om/get-node owner "text"))))
+      ;(when (not= current-draft (:current-draft data)))
+      (utils.dom/cursor->end-and-scroll (om/get-node owner "text")))
     om/IDidMount
     (did-mount [_]
       (utils.dom/cursor->end-and-scroll (om/get-node owner "text")))

@@ -7,11 +7,11 @@
             [white-ink.utils.actions :refer [start-actions-handler]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [white-ink.utils.data :as data]
-            [white-ink.components.menu :refer [menu-view]])
+            [white-ink.components.quick-settings :refer [quick-settings-view]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [send-action!]]))
 
-(defn app [{:keys [searching? speed->opacity menu] :as data} owner]
+(defn app [{:keys [searching? speed->opacity quick-settings] :as data} owner]
   (reify
     om/IWillMount
     (will-mount [_]
@@ -26,13 +26,11 @@
                                  (.preventDefault %))}
                (when searching?
                  (om/build search/input data))
-               (when (:show? menu)
-                 (om/build menu-view data))
-
-               [:div {:style (when (:show? menu)
+               (when (:show? quick-settings)
+                 (om/build quick-settings-view data))
+               [:div {:style (when (:show? quick-settings)
                                {:-webkit-filter "blur(3px)"
                                 :opacity        0.1
-                                :transition     "all 2s ease-in"
                                 :background     "white"
                                 :position       "absolute"
                                 :height         "100%"

@@ -36,7 +36,7 @@
 (def app-state (atom {:user              {:settings {:text-grain false}
                                           ;; metrics would be individual stats about a user calculated over time
                                           :metrics  {:avg-typing-speed 200}}
-                      :menu              {:show?  true
+                      :quick-settings    {:show? false
                                           :items {:current-document?   true
                                                   :documents?          false
                                                   :keyboard-shortcuts? false

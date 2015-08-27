@@ -10,14 +10,13 @@
             )
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
-(defn toggle-search [app-state tasks]
-  (do (when (:searching? @app-state)
-        (put! tasks [:editor :focus]))
-      (om/transact! app-state :searching? not)))
+(defn toggle-setting [setting-path app-state]
+  (om/transact! app-state setting-path not))
 
 (defn match-dispatch [app-state tasks action-vec]
   (match [action-vec]
-         [[:key-down :app :backslash]] (toggle-search app-state tasks)
+         [[:key-down :app :backslash]] (toggle-setting [:searching?] app-state)
+         [[:key-down :app :option-forwardslash]] (toggle-setting [:quick-settings :show?] app-state)
          [[:key-down :editor :tab]] (put! tasks [:notepad-editor :new-note])
 
          [[:key-down :editor :arrow-left]] (constantly nil)
@@ -42,7 +41,6 @@
          [[:reviewer :search query]] (put! tasks [:reviewer :search query])
          [[:reviewer :scroll-to note]] (put! tasks [:reviewer :scroll-to note])
 
-         [[:toggle-search]] (toggle-search app-state tasks)
          [[:search-off]] (do (put! tasks [:editor :focus])
                              (om/update! app-state :searching? false))
 
