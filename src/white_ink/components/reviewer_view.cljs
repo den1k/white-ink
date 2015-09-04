@@ -15,15 +15,12 @@
   (:require-macros [white-ink.macros :refer [process-task
                                              send-action!]]))
 
-(defn review-draft-view [{:keys [searching?] :as data} owner {:keys [sessions-inserts sessions-notes] :as opts}]
+(defn review-draft-view [{:keys [searching? sessions-notes] :as data} owner]
   (reify
     om/IInitState
     (init-state [_]
-      (let [draft-text (data/inserts->text sessions-inserts)
-            actions-chan (om/get-shared owner :actions)]
-        {:draft-text      draft-text
-         :render-text     (insert-note-hooks [[:text draft-text]] sessions-notes)
-         :result-idx      nil
+      (let [actions-chan (om/get-shared owner :actions)]
+        {:result-idx      nil
          :throttle-action (throttle-chan 200 actions-chan)
          :debounce-action (debounce-chan 2000 actions-chan)}))
     om/IWillMount
@@ -99,9 +96,12 @@
     (render [_]
       (let [sessions-inserts (om/get-state owner :sessions-inserts)
             sessions-notes (->> sessions-inserts
-                           data/add-abs-idxs-to-notes
-                           data/cat-sort-notes)]
+                                data/add-abs-idxs-to-notes
+                                data/cat-sort-notes)
+            draft-text (data/inserts->text sessions-inserts)]
         (html [:div {:style (assoc styles/reviewer-view :opacity speed->opacity)}
-               (om/build review-draft-view data {:opts {:sessions-inserts sessions-inserts
-                                                        :sessions-notes   sessions-notes}})
+               (om/build review-draft-view data {:state {:sessions-inserts sessions-inserts
+                                                         :sessions-notes   sessions-notes
+                                                         :draft-text       draft-text
+                                                         :render-text      (insert-note-hooks [[:text draft-text]] sessions-notes)}})
                (om/build notepad-reviewer sessions-notes)])))))

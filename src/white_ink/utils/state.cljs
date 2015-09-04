@@ -2,7 +2,7 @@
   (:require [om.core :as om]
             [white-ink.utils.text :as utils.text]
             [clojure.string :as string]
-            ))
+            [cljs.pprint :refer [pprint]]))
 
 (defn make-squuid
   "(make-squuid)  =>  new-uuid
@@ -65,7 +65,7 @@
                    (- (count orig-text)
                       (count text-content)))
         cur-insert (-> current-draft :current-session :current-insert)]
-    (prn @cur-insert)
+    ;(prn @cur-insert)
     (om/transact! cur-insert #(merge % {:text     new-text
                                         :removed? removed?}))))
 
@@ -75,3 +75,22 @@
                      (when el
                        (om/update! data :review-scroll-top (.-scrollTop el))))]
     (persist-fn el)))
+
+(defn merge-current-session [{:keys [current-draft] :as data}]
+  (let [current-session (:current-session current-draft)
+        {:keys [current-insert
+                inserts]} current-session
+        new-inserts (conj inserts current-insert)]
+    #_(doseq [i new-inserts]
+        (prn i))
+    (pprint
+      @(om/transact! data
+                     [:current-draft]
+                     #(-> %
+                          (assoc-in [:current-session :current-insert]
+                                    {:start-idx 0           ; temp zero, probs len of review text
+                                     :text      ""
+                                     :removed?  nil
+                                     :notes     []})
+                          (assoc-in [:current-session :inserts] [])
+                          (update :sessions conj new-inserts))))))

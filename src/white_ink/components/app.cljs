@@ -7,6 +7,7 @@
             [white-ink.utils.actions :refer [start-actions-handler]]
             [white-ink.utils.shortcuts :refer [handle-shortcuts]]
             [white-ink.utils.data :as data]
+            [cljs.pprint :refer [pprint]]
             [white-ink.components.quick-settings :refer [quick-settings-view]])
   (:require-macros [cljs.core.async.macros :as async]
                    [white-ink.macros :refer [send-action!]]))
@@ -19,6 +20,7 @@
     om/IRender
     (render [_]
       (let [sessions-inserts (data/->sessions-inserts data)]
+        ;(pprint sessions-inserts)
         (html [:div
                {:on-key-down   #(handle-shortcuts :app %)
                 :on-mouse-move #(when (> 1 speed->opacity)

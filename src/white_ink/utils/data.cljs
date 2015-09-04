@@ -39,7 +39,7 @@
   ([inserts init-text]
    (reduce
      (fn [total-text {:keys [start-idx text removed?]}]
-       (str (subs total-text (or removed? 0) start-idx)
+       (str (subs total-text 0 (- start-idx removed?))
             text
             (subs total-text start-idx)))
      init-text
@@ -88,13 +88,6 @@
         nts (:notes insert)]
     (map #(update % :draft-index + offset) nts)))
 
-#_(defn merge-sort-notes-sessions [data]
-  (->> data
-       cur-sessions
-       (mapcat :inserts)
-       (into [] (mapcat insert-add-offset-to-notes))
-       (sort-by :draft-index)))
-
 (defn get-abs-char-idx [sessions insert-idx rel-char-idx]
   (let [abs-char-idx (+ (get-in sessions [insert-idx :start-idx])
                         rel-char-idx)]
@@ -109,6 +102,7 @@
 
 (defn add-abs-idxs-to-notes [sessions-inserts]
   (for [[i insert] (map-indexed vector sessions-inserts)]
+    ;; note offsets for removed not yet implemented
     (update insert :notes
             (fn [notes]
               (map #(assoc % :abs-idx (get-abs-char-idx sessions-inserts i (:rel-idx %))) notes)))))

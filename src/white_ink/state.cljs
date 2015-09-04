@@ -35,8 +35,10 @@
 ;; define your app data so that it doesn't get over-written on reload
 (def app-state (atom {:user              {:settings {:text-grain false}
                                           ;; metrics would be individual stats about a user calculated over time
-                                          :metrics  {:avg-typing-speed 200}}
-                      :quick-settings    {:show? false
+                                          :metrics  {:avg-typing-speed 200}
+                                          :first-name "Dennis"
+                                          :last-name "Heihoff"}
+                      :quick-settings    {:show? true
                                           :items {:current-document?   true
                                                   :documents?          false
                                                   :keyboard-shortcuts? false
@@ -45,7 +47,9 @@
                       :text-fade-delay   45000
                       :review-scroll-top 2000
                       :speed->opacity    1
-                      :current-draft     {:current-session {:current-insert {:start-idx 20 ;where insert started in draft
+                      :current-draft     {:title "The Adventures of Current Draft"
+                                          :start-date "August 14th 2015"
+                                          :current-session {:current-insert {:start-idx 20 ;where insert started in draft
                                                                              :text      (:current inserts-text) ; insert text
                                                                              :removed?  0
                                                                              :notes     (notes-gen 2 (:current inserts-text) "cur ses cur ins")} ; number of characters removed - if any
@@ -79,9 +83,9 @@
                                                              ; first insert
                                                              {:start-idx                                   5
                                                               :text     #_(-> ses-ins-text :second :first) "abcdefghijklm"
-                                                              :removed?                                    5
+                                                              :removed?                                    0
                                                               :notes                                       [{:text    "note 0 0"
-                                                                                                             :rel-idx 1}]}
+                                                                                                             :rel-idx 2}]}
                                                              ; second insert
                                                              {:start-idx                                    3
                                                               :text     #_(-> ses-ins-text :second :second) "NOPVWQRSTXYZ"
@@ -89,6 +93,9 @@
                                                               :notes                                        [{:text    "note 1 0"
                                                                                                               :rel-idx 3}]}]]}
                       :drafts            [; this would contain "other" drafts, i.e. entirely different writing projects
+                                          {:title "The first document"}
+                                          {:title "The second document"}
+                                          {:title "The third document"}
                                           ]}))
 
 
