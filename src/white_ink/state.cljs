@@ -54,7 +54,9 @@
                                                                              :removed?  0
                                                                              :notes     (notes-gen 2 (:current inserts-text) "cur ses cur ins")} ; number of characters removed - if any
                                                             ;; inserts are not visible until the end of the session, when it is added to `sessions`
-                                                            :inserts        [{:start-idx 0 ;where insert started in draft
+                                                            :inserts        [{;where insert started in draft
+                                                                              ; if it is nil it will be appended to anything before
+                                                                              :start-idx nil
                                                                               :text      (:first inserts-text) ; insert text
                                                                               :removed?  0
                                                                               :notes     (notes-gen 2 (:first inserts-text) "cur ses 1st ins")}

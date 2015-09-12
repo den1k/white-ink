@@ -33,6 +33,9 @@
   "Trims white spaces to the left and right of a string."
   (comp gstring/trim gstring/collapseBreakingSpaces))
 
+(def trim-right
+  gstring/trimRight)
+
 (defn index-of-char
   "Returns idx of char in text. "
   [char]

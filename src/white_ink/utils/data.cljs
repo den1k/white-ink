@@ -34,14 +34,19 @@
   (comp :inserts cur-session))
 
 (defn inserts->text
-  "Concats the text from inserts into one string."
+  "Concats the text from inserts into one string.
+  Appends an insert if it has no start-idx."
   ([inserts] (inserts->text inserts ""))
   ([inserts init-text]
    (reduce
      (fn [total-text {:keys [start-idx text removed?]}]
-       (str (subs total-text 0 (- start-idx removed?))
-            text
-            (subs total-text start-idx)))
+       (if (nil? start-idx)
+         (str total-text text \space)
+         (let [remove? (- start-idx removed?)]
+           (str (subs total-text 0 remove?)
+                text
+                \space
+                (subs total-text start-idx)))))
      init-text
      inserts)))
 

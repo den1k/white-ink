@@ -55,3 +55,12 @@
           [next-idx k total])))
     [-1 0]
     coll))
+
+(defn maybe-f [f]
+  (fn [x]
+    (when x
+      (f x))))
+
+(defn maybe [f x]
+  (when x
+    (f x)))

@@ -59,16 +59,19 @@
   This waits for a half second break before persisting.
   Beware, if current-insert changes before the wait period expired, this will overwrite state."
   [{:keys [current-draft] :as app-state} {:keys [text-content orig-text start-idx]}]
-  (let [new-text (subs text-content start-idx)
+  (let [new-text (-> text-content
+                     (subs start-idx)
+                     utils.text/trim-right)
         ;; removed may have to be dec'd
         removed? (when (utils.text/empty-or-whitespace? new-text)
                    (- (count orig-text)
                       (count text-content)))
         cur-insert (-> current-draft :current-session :current-insert)]
+    ;(prn "text content" text-content)
+    ;(prn "new-text" new-text)
     ;(prn @cur-insert)
     (om/transact! cur-insert #(merge % {:text     new-text
                                         :removed? removed?}))))
-
 (defn persist-scroll-offset [data el]
   (let [persist-fn (fn [el]
                      ;; no-op if nil. Could maybe checked earlier?
@@ -81,14 +84,12 @@
         {:keys [current-insert
                 inserts]} current-session
         new-inserts (conj inserts current-insert)]
-    #_(doseq [i new-inserts]
-        (prn i))
     (pprint
       @(om/transact! data
                      [:current-draft]
                      #(-> %
                           (assoc-in [:current-session :current-insert]
-                                    {:start-idx 0           ; temp zero, probs len of review text
+                                    {:start-idx nil         ; temp zero, probs len of review text
                                      :text      ""
                                      :removed?  nil
                                      :notes     []})
