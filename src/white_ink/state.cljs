@@ -22,23 +22,23 @@
 (def mock-notes-second-session (notes-gen 5 session-2 "second session"))
 
 (def inserts-text
-  {:current "I'm the current insert, the one and only current insert bro."
-   :first   "First instert in current-session"
-   :second  "second instert in current-session"
-   :third   "third instert in current-session"})
+  {:current "I'm the current insert, the one you are currently editing."
+   :first   "I'm the first instert in current-session"
+   :second  "I'm the second instert in current-session"
+   :third   "I'm the third instert in current-session"})
 
 (def ses-ins-text
   {:first  {:first "I'm the very first insert of the very first session. The first insert of all inserts. Basically the beginning of all writing."}
-   :second {:first  "The first inserts in the second session, hi!"
-            :second "The second and in the second session. Pleasure to meet you."}})
+   :second {:first  "I'm  the first insert in the second session, hi!"
+            :second "I'm the second and in the second session. Pleasure to meet you."}})
 
 ;; define your app data so that it doesn't get over-written on reload
-(def app-state (atom {:user              {:settings {:text-grain false}
+(def app-state (atom {:user              {:settings {:text-grain true}
                                           ;; metrics would be individual stats about a user calculated over time
                                           :metrics  {:avg-typing-speed 200}
                                           :first-name "Dennis"
                                           :last-name "Heihoff"}
-                      :quick-settings    {:show? true
+                      :quick-settings    {:show? false
                                           :items {:current-document?   true
                                                   :documents?          false
                                                   :keyboard-shortcuts? false
@@ -73,7 +73,7 @@
                                                             [
                                                              ; first insert
                                                              {:start-idx                                  0
-                                                              :text     #_(-> ses-ins-text :first :first) "0123456789"
+                                                              :text     #_(-> ses-ins-text :first :first) "First session, first insert"
                                                               :removed?                                   0
                                                               :notes                                      [{:text    "note 0 0" ;; from session: insert 0, note 0
                                                                                                             :rel-idx 2}
@@ -84,13 +84,13 @@
                                                             [
                                                              ; first insert
                                                              {:start-idx                                   5
-                                                              :text     #_(-> ses-ins-text :second :first) "abcdefghijklm"
+                                                              :text     #_(-> ses-ins-text :second :first) "Second session, second insert"
                                                               :removed?                                    0
                                                               :notes                                       [{:text    "note 0 0"
                                                                                                              :rel-idx 2}]}
                                                              ; second insert
                                                              {:start-idx                                    3
-                                                              :text     #_(-> ses-ins-text :second :second) "NOPVWQRSTXYZ"
+                                                              :text     #_(-> ses-ins-text :second :second) "Third session, third insert"
                                                               :removed?                                     0
                                                               :notes                                        [{:text    "note 1 0"
                                                                                                               :rel-idx 3}]}]]}
