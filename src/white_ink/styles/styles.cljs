@@ -37,14 +37,16 @@
           ; z-index for grain
           :zIndex              0
           :height              editor-height
-          :-webkit-user-select "none"}))
+          ;; user select none not needed bc gradient on top
+          ;:WebkitUserSelect "none"
+          }))
 
 (def ^:const reviewer-text
   (merge typo/write-1
          {:height   reviewer-height
           :overflow "auto"
           :color    colors/reviewable-text
-          :-webkit-user-select "initial"}))
+          :WebkitUserSelect "initial"}))
 
 (def ^:const reviewer-view
   (merge texts-and-notepad
@@ -62,7 +64,7 @@
    :overflowX     "hidden"
    :overflowY     "scroll"
    :direction     "rtl"
-   :-webkit-user-select "none"})
+   :WebkitUserSelect "none"})
 
 (def notepad-editor
   (assoc notepad

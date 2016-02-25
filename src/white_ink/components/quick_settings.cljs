@@ -131,7 +131,7 @@
                         :outline      "none"
                         :border       "none"
                         :borderRadius "5px"
-                        :fontFamily   "\"HelveticaNeue-Light\", \"Helvetica Neue Light\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif;"
+                        :fontFamily   "\"HelveticaNeue-Light\", \"Helvetica Neue Light\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif"
                         :height       50
                         :width        500
                         :textAlign    "baseline"
@@ -169,7 +169,7 @@
                             :borderRadius  "5px"
                             :height        300
                             :width         600
-                            :fontFamily    "\"HelveticaNeue-Light\", \"Helvetica Neue Light\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif;"}}
+                            :fontFamily    "\"HelveticaNeue-Light\", \"Helvetica Neue Light\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif"}}
                ;; search shows ups conditionally when documents are shown
                ;; also, list of documents renders below search and is filtered throughout
                [:div {:style {:marginBottom 20}}

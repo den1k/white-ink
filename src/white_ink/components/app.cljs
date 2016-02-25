@@ -31,7 +31,7 @@
                (when (:show? quick-settings)
                  (om/build quick-settings-view data))
                [:div {:style (when (:show? quick-settings)
-                               {:-webkit-filter "blur(3px)"
+                               {:WebkitFilter "blur(3px)"
                                 :opacity        0.1
                                 :background     "white"
                                 :position       "absolute"

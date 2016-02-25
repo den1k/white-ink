@@ -139,6 +139,11 @@ ul {
     color: #323232 !important;
 }
 
+.quick-settings-button:hover {
+    background: #323232 !important;
+    color: white;
+}
+
 /*.review-draft:before {*/
 /*background: none;*/
 /*transition: all*/
